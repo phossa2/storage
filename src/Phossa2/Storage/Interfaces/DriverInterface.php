@@ -24,4 +24,78 @@ namespace Phossa2\Storage\Interfaces;
  */
 interface DriverInterface
 {
+    /**
+     * Does this path exist ?
+     *
+     * @param  string $path
+     * @return bool
+     * @access public
+     */
+    public function exists(/*# string */ $path)/*# : bool */;
+
+    /**
+     * Get content or open stream from this path
+     *
+     * @param  string $path
+     * @param  bool $stream
+     * @return string|resource|array
+     * @access public
+     */
+    public function getContent(/*# string */ $path, /*# bool */ $stream = false);
+
+    /**
+     * Get the meta
+     *
+     * @param  string $path
+     * @return array
+     * @access public
+     */
+    public function getMeta(/*# string */ $path)/*# : array */;
+
+    /**
+     * Write content to path
+     *
+     * @param  string $path
+     * @param  string|resource $content
+     * @return bool operation status
+     * @access public
+     */
+    public function setContent(/*# string */ $path, $content)/*# : bool */;
+
+    /**
+     * Set meta data
+     *
+     * @param  string $path
+     * @param  array $meta
+     * @return bool operation status
+     * @access public
+     */
+    public function setMeta(/*# string */ $path, array $meta)/*# : bool */;
+
+    /**
+     * Rename
+     *
+     * @param  string $from
+     * @param  string $to
+     * @access public
+     */
+    public function rename(/*# string */ $from, /*# string */ $to)/*# : bool */;
+
+    /**
+     * Copy
+     *
+     * @param  string $from
+     * @param  string $to
+     * @access public
+     */
+    public function copy(/*# string */ $from, /*# string */ $to)/*# : bool */;
+
+    /**
+     * Delete
+     *
+     * @param  string $path
+     * @return bool
+     * @access public
+     */
+    public function delete(/*# string */ $path)/*# : bool */;
 }

@@ -14,6 +14,8 @@
 
 namespace Phossa2\Storage\Interfaces;
 
+use Phossa2\Storage\Path;
+
 /**
  * PathAwareInterface
  *
@@ -28,9 +30,9 @@ interface PathAwareInterface
      * Returns a Path object
      *
      * @param  string $path
-     * @return PathInterface
+     * @return Path
      * @access public
      * @api
      */
-    public function path(/*# string */ $path)/*# : PathInterface */;
+    public function path(/*# string */ $path)/*# : Path */;
 }

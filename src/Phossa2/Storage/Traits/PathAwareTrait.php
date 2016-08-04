@@ -14,9 +14,8 @@
 
 namespace Phossa2\Storage\Traits;
 
-use Phossa2\Storage\Interfaces\PathInterface;
-use Phossa2\Storage\Interfaces\PathAwareInterface;
 use Phossa2\Storage\Path;
+use Phossa2\Storage\Interfaces\PathAwareInterface;
 
 /**
  * PathAwareTrait
@@ -42,7 +41,7 @@ trait PathAwareTrait
     /**
      * {@inheritDoc}
      */
-    public function path(/*# string */ $path)/*# : PathInterface */
+    public function path(/*# string */ $path)/*# : Path */
     {
         // try cache
         $obj = $this->getFromCache($path);
@@ -50,18 +49,25 @@ trait PathAwareTrait
             return $obj;
         }
 
-        // normalize path
-        $norm = $this->normalize($path);
-
-        // split path
-        list($mnt, $remain) = $this->splitPath($norm);
-
-        $obj = new Path($remain, $this->getFilesystemAt($mnt));
+        // new Path object
+        $obj = $this->newPath($this->normalize($path));
 
         // save to cache
         $this->saveToCache($path, $obj);
 
         return $obj;
+    }
+
+    /**
+     * Generate Path object
+     *
+     * @param  string $path
+     * @return Path
+     * @access protected
+     */
+    protected function newPath(/*# string */ $path)/*# : Path */ {
+        list($mnt, $remain) = $this->splitPath($path);
+        return new Path($path, $remain, $this->getFilesystemAt($mnt));
     }
 
     /**
@@ -76,17 +82,32 @@ trait PathAwareTrait
         // mount point
         $pref = $this->getMountPoint($path);
 
-        // remain
+        // remains without leading '/'
         $remain = ltrim(substr($path, strlen($pref)), '/');
 
         return [$pref, $remain];
     }
 
     /**
+     * Merge path
+     *
+     * @param  string $prefix
+     * @param  string $suffix
+     * @return string
+     * @access protected
+     */
+    protected function mergePath(
+        /*# string */ $prefix,
+        /*# string */ $suffix
+    )/*# : string */ {
+        return rtrim($prefix, '/') . '/' . ltrim($suffix, '/');
+    }
+
+    /**
      * Get Path object from local cache
      *
      * @param  string $path
-     * @return false|PathInterface
+     * @return false|Path
      * @access protected
      */
     protected function getFromCache(/*# string */ $path)
@@ -102,10 +123,10 @@ trait PathAwareTrait
      * Save Path object to local cache
      *
      * @param  string $path
-     * @param  PathInterface $obj
+     * @param  object $obj
      * @access protected
      */
-    protected function saveToCache(/*# string */ $path, PathInterface $obj)
+    protected function saveToCache(/*# string */ $path, $obj)
     {
         $key = $this->getCacheKey($path);
 

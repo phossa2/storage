@@ -14,8 +14,6 @@
 
 namespace Phossa2\Storage\Interfaces;
 
-use Phossa2\Shared\Error\ErrorAwareInterface;
-
 /**
  * PathInterface
  *
@@ -24,34 +22,27 @@ use Phossa2\Shared\Error\ErrorAwareInterface;
  * @version 2.0.0
  * @since   2.0.0 added
  */
-interface PathInterface extends FilesystemAwareInterface, ErrorAwareInterface
+interface PathInterface
 {
     /**
      * Does this path exist ?
      *
+     * @param  bool $check force checking instead of using cached result
      * @return bool
      * @access public
      * @api
      */
-    public function exists()/*# : bool */;
-
-    /**
-     * Write to the driver if updated
-     *
-     * @return bool write status
-     * @access public
-     * @api
-     */
-    public function write()/*# : bool */;
+    public function exists(/*# bool */ $check = false)/*# : bool */;
 
     /**
      * Get content from the path
      *
-     * @return string|string[]|null
+     * @param  bool $stream open stream to get
+     * @return string|array|resource|null
      * @access public
      * @api
      */
-    public function getContent();
+    public function getContent(/*# bool */ $stream = false);
 
     /**
      * Get meta data from the path
@@ -63,7 +54,7 @@ interface PathInterface extends FilesystemAwareInterface, ErrorAwareInterface
     public function getMeta()/*# : array */;
 
     /**
-     * Get the path
+     * Get the relative path
      *
      * @return string
      * @access public
@@ -71,44 +62,44 @@ interface PathInterface extends FilesystemAwareInterface, ErrorAwareInterface
     public function getPath()/*# : string */;
 
     /**
-     * Set content of this path before write
+     * Set content of this path
      *
-     * @param  string $content
-     * @return $this
+     * @param  string|resource $content
+     * @return bool operation status
      * @access public
      * @api
      */
-    public function setContent(/*# string */ $content = '');
+    public function setContent($content)/*# : bool */;
 
     /**
-     * Update meta data (or partial)
+     * Update meta data
      *
      * @param  array $meta
-     * @return $this
+     * @return bool operation status
      * @access public
      * @api
      */
-    public function setMeta(array $meta);
+    public function setMeta(array $meta)/*# : bool */;
 
     /**
-     * Same filesystem rename
+     * rename to destination
      *
      * @param  string $destination
      * @return bool
      * @access public
      * @api
      */
-    public function rename(/*# : string */ $destination)/*# : bool */;
+    public function rename(/*# string */ $destination)/*# : bool */;
 
     /**
-     * Same filesystem copy
+     * Copy to destination
      *
      * @param  string $destination
      * @return bool
      * @access public
      * @api
      */
-    public function copy(/*# : string */ $destination)/*# : bool */;
+    public function copy(/*# string */ $destination)/*# : bool */;
 
     /**
      * Delete this path

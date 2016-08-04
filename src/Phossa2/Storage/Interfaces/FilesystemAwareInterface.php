@@ -25,8 +25,6 @@ namespace Phossa2\Storage\Interfaces;
 interface FilesystemAwareInterface
 {
     /**
-     * Set filesystem
-     *
      * @param  FilesystemInterface $filesystem
      * @return $this
      * @access public
@@ -35,8 +33,6 @@ interface FilesystemAwareInterface
     public function setFilesystem(FilesystemInterface $filesystem);
 
     /**
-     * Get filesystem
-     *
      * @return FilesystemInterface
      * @access public
      * @api

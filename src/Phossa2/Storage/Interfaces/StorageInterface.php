@@ -19,10 +19,11 @@ namespace Phossa2\Storage\Interfaces;
  *
  * @package Phossa2\Storage
  * @author  Hong Zhang <phossa@126.com>
+ * @see     MountableInterface
  * @version 2.0.0
  * @since   2.0.0 added
  */
-interface StorageInterface
+interface StorageInterface extends MountableInterface
 {
     /**
      * Check a path exists or not
@@ -41,7 +42,7 @@ interface StorageInterface
      * - if is dir, returns array of paths
      *
      * @param  string $path
-     * @param  bool $stream read from stream
+     * @param  bool $stream return a stream to read from
      * @return null|string|array|stream
      * @access public
      * @api
@@ -49,11 +50,11 @@ interface StorageInterface
     public function get(/*# string */ $path, /*# bool */ $stream = false);
 
     /**
-     * Write content to the path
+     * Write content or meta data to the path
      *
      * @param  string $path
-     * @param  string|resource $content
-     * @param  array $meta extra meta data if any
+     * @param  string|resource|null $content
+     * @param  array $meta meta data if any
      * @return bool operation status
      * @access public
      * @api
@@ -77,33 +78,29 @@ interface StorageInterface
     /**
      * Copy to a new path
      *
-     * @param  string $from
-     * @param  string $to
-     * @param  bool $stream use $from as stream
+     * @param  string $from source path
+     * @param  string $to destination path
      * @return bool operation status
      * @access public
      * @api
      */
     public function copy(
         /*# string */ $from,
-        /*# string */ $to,
-        /*# bool */ $stream = false
+        /*# string */ $to
     )/*# : bool */;
 
     /**
      * Move to a new path
      *
-     * @param  string $from
-     * @param  string $to
-     * @param  bool $stream use $from as stream
+     * @param  string $from source path
+     * @param  string $to destination path
      * @return bool operation status
      * @access public
      * @api
      */
     public function move(
         /*# string */ $from,
-        /*# string */ $to,
-        /*# bool */ $stream = false
+        /*# string */ $to
     )/*# : bool */;
 
     /**

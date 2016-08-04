@@ -19,30 +19,38 @@ use Phossa2\Shared\Base\ObjectAbstract;
 use Phossa2\Storage\Traits\PathAwareTrait;
 use Phossa2\Shared\Error\ErrorAwareInterface;
 use Phossa2\Storage\Interfaces\StorageInterface;
-use Phossa2\Storage\Interfaces\MountableInterface;
+use Phossa2\Shared\Extension\ExtensionAwareTrait;
 use Phossa2\Storage\Interfaces\PathAwareInterface;
+use Phossa2\Shared\Extension\ExtensionAwareInterface;
 
 /**
  * Storage
  *
  * @package Phossa2\Storage
  * @author  Hong Zhang <phossa@126.com>
+ * @see     ObjectAbstract
+ * @see     StorageInterface
+ * @see     PathAwareInterface
+ * @see     ErrorAwareInterface
+ * @see     ExtensionAwareInterface
  * @version 2.0.0
  * @since   2.0.0 added
  */
-class Storage extends ObjectAbstract implements StorageInterface, MountableInterface, PathAwareInterface, ErrorAwareInterface
+class Storage extends ObjectAbstract implements StorageInterface, PathAwareInterface, ErrorAwareInterface, ExtensionAwareInterface
 {
-    use PathAwareTrait;
+    use PathAwareTrait, ExtensionAwareTrait;
 
     /**
      * {@inheritDoc}
      */
     public function has(/*# string */ $path)/*# : bool */
     {
+        // found
         if ($this->path($path)->exists()) {
             return true;
         }
 
+        // not found
         return $this->setError(
             Message::get(Message::MSG_PATH_NOTFOUND, $path),
             Message::MSG_PATH_NOTFOUND
@@ -54,14 +62,18 @@ class Storage extends ObjectAbstract implements StorageInterface, MountableInter
      */
     public function get(/*# string */ $path, /*# bool */ $stream = false)
     {
-        $res = null;
-        if ($this->has($path)) {
-            $p = $this->path($path);
-            if ($this->isFilesystemReadable($p->getFilesystem(), $path)) {
-                $res = $p->getContent($stream);
-                $this->copyError($p);
-            }
+        $obj = $this->path($path);
+        $res = $obj->getContent($stream);
+
+        // append mount point if directory
+        if (is_array($res)) {
+            return $this->prependMountPoint(
+                $res, $this->getMountPoint($this->normalize($path))
+            );
         }
+
+        $this->copyError($obj);
+
         return $res;
     }
 
@@ -73,13 +85,18 @@ class Storage extends ObjectAbstract implements StorageInterface, MountableInter
         $content,
         array $meta = []
     )/*# : bool */ {
-        $p = $this->path($path);
-        if ($this->isFilesystemWritable($p->getFilesystem(), $path)) {
-            $res = $p->setContent($content)->setMeta($meta)->write();
-            $this->copyError($p);
-            return $res;
+        $obj = $this->path($path);
+
+        // write content
+        if (null !== $content && !$obj->setContent($content)) {
+            $this->copyError($obj);
+            return false;
         }
-        return false;
+
+        // set meta if any
+        $res = $obj->setMeta($meta);
+        $this->copyError($obj);
+        return $res;
     }
 
     /**
@@ -87,11 +104,10 @@ class Storage extends ObjectAbstract implements StorageInterface, MountableInter
      */
     public function meta(/*# string */ $path)/*# : array */
     {
-        if ($this->has($path)) {
-            $p = $this->path($path);
-            return $p->getMeta();
-        }
-        return [];
+        $obj = $this->path($path);
+        $res = $obj->getMeta();
+        $this->copyError($obj);
+        return $res;
     }
 
     /**
@@ -99,26 +115,27 @@ class Storage extends ObjectAbstract implements StorageInterface, MountableInter
      */
     public function copy(
         /*# string */ $from,
-        /*# string */ $to,
-        /*# bool */ $stream = false
+        /*# string */ $to
     )/*# : bool */ {
         // same filesystem copy
         if ($this->isSameFilesystem($from, $to)) {
-            return $this->sameFilesystemAction($from, $to, 'copy', $stream);
+            return $this->sameFilesystemAction($from, $to, 'copy');
         }
 
-        // read $from
-        $content = $this->get($from, $stream);
-        if ($this->hasError()) {
+        $content = $this->get($from);
+
+        if (is_null($content)) {
+            // read error
             return false;
-        }
 
-        // write $to
-        $res = $this->put($to, $content);
-        if (is_resource($content)) {
-            fclose($content);
+        } elseif (is_array($content)) {
+            // copy directory
+            return $this->copyDir($content, $to);
+
+        } else {
+            // write $to
+            return $this->put($to, $content);
         }
-        return $res;
     }
 
     /**
@@ -126,16 +143,15 @@ class Storage extends ObjectAbstract implements StorageInterface, MountableInter
      */
     public function move(
         /*# string */ $from,
-        /*# string */ $to,
-        /*# bool */ $stream = false
+        /*# string */ $to
     )/*# : bool */ {
         // same filesystem move
         if ($this->isSameFilesystem($from, $to)) {
-            return $this->sameFilesystemAction($from, $to, 'rename', $stream);
+            return $this->sameFilesystemAction($from, $to, 'rename');
         }
 
         // diff filesystem move
-        if ($this->copy($from, $to, $stream)) {
+        if ($this->copy($from, $to)) {
             return $this->delete($from);
         }
         return false;
@@ -146,18 +162,9 @@ class Storage extends ObjectAbstract implements StorageInterface, MountableInter
      */
     public function delete(/*# string */ $path)/*# : bool */
     {
-        if (!$this->has($path)) {
-            return false;
-        }
-
-        $p = $this->path($path);
-        if (!$this->isFilesystemDeletable($p->getFilesystem(), $path)) {
-            return false;
-        }
-
-        $res = $p->delete();
-        $this->copyError($p);
-
+        $obj = $this->path($path);
+        $res = $obj->delete();
+        $this->copyError($obj);
         return $res;
     }
 
@@ -167,32 +174,17 @@ class Storage extends ObjectAbstract implements StorageInterface, MountableInter
      * @param  string $from
      * @param  string $to
      * @param  string $action 'copy' or 'rename'
-     * @param  bool $stream using stream
      * @return bool
      * @access protected
      */
     protected function sameFilesystemAction(
         /*# string */ $from,
         /*# string */ $to,
-        /*# string */ $action = 'copy',
-        /*# bool */ $stream = false
+        /*# string */ $action = 'copy'
     )/*# : bool */ {
-        // check to
-        $t = $this->path($to);
-        if (!$this->isFilesystemWritable($t->getFilesystem(), $to)) {
-            return false;
-        }
-
-        // check from
-        if (!$this->has($from)) {
-            return false;
-        }
-
-        // copy/rename
-        $f = $this->path($from);
-        $res = $f->{$action}($t->getPath(), $stream);
-
-        $this->copyError($f);
+        $obj = $this->path($from);
+        $res = $obj->{$action}($this->path($to)->getPath());
+        $this->copyError($obj);
         return $res;
     }
 
@@ -201,7 +193,7 @@ class Storage extends ObjectAbstract implements StorageInterface, MountableInter
      *
      * @param  string $path1
      * @param  string $path2
-     * @return boolean
+     * @return bool
      * @access protected
      */
     protected function isSameFilesystem(
@@ -209,5 +201,43 @@ class Storage extends ObjectAbstract implements StorageInterface, MountableInter
         /*# string */ $path2
     )/*# : bool */ {
         return $this->path($path1)->getFilesystem() === $this->path($path2)->getFilesystem();
+    }
+
+    /**
+     * Copy an array of paths to destination
+     *
+     * @param  array $paths
+     * @param  string $destination
+     * @access protected
+     */
+    protected function copyDir(array $paths, /*# string */ $destination)
+    {
+        foreach ($paths as $path) {
+            $base = basename($path);
+            $dest = $this->mergePath($destination, $base);
+            if (!$this->copy($path, $dest)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
+     * Prepend mount point prefix to the array of paths
+     *
+     * @param  array $paths
+     * @param  string $mountPoint
+     * @return array
+     * @access protected
+     */
+    protected function prependMountPoint(
+        array $paths,
+        /*# string */ $mountPoint
+    )/*# : array */ {
+        $res = [];
+        foreach ($paths as $p) {
+            $res[] = $this->mergePath($mountPoint, $p);
+        }
+        return $res;
     }
 }

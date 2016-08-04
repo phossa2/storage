@@ -14,13 +14,11 @@
 
 namespace Phossa2\Storage;
 
-use Phossa2\Storage\Message\Message;
 use Phossa2\Shared\Base\ObjectAbstract;
 use Phossa2\Storage\Traits\DriverAwareTrait;
 use Phossa2\Storage\Interfaces\DriverInterface;
 use Phossa2\Storage\Traits\PermissionAwareTrait;
 use Phossa2\Storage\Interfaces\FilesystemInterface;
-use Phossa2\Storage\Exception\BadMethodCallException;
 use Phossa2\Storage\Interfaces\PermissionAwareInterface;
 
 /**
@@ -54,26 +52,5 @@ class Filesystem extends ObjectAbstract implements FilesystemInterface
 
         // set permissions for THIS filesystem
         $this->setPermissions($permissions);
-    }
-
-    /**
-     * Forward to the driver
-     *
-     * @param  string $method
-     * @param  array $args
-     * @throws BadMethodCallException if method not found
-     * @access public
-     */
-    public function __call(/*# string */ $method, array $args)
-    {
-        $driver = $this->getDriver();
-        if (method_exists($driver, $method)) {
-            return call_user_func_array([$driver, $method], $args);
-        }
-
-        throw new BadMethodCallException(
-            Message::get(Message::MSG_METHOD_NOTFOUND, $method),
-            Message::MSG_METHOD_NOTFOUND
-        );
     }
 }

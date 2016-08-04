@@ -30,7 +30,7 @@ use Phossa2\Storage\Interfaces\PermissionAwareInterface;
 trait PermissionAwareTrait
 {
     /**
-     * Default permissions
+     * permissions
      *
      * @var    int
      * @access protected
