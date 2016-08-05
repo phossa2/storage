@@ -62,8 +62,6 @@ class SampleClassTest extends \PHPUnit_Framework_TestCase
      * Test get
      *
      * @cover Phossa2\Storage\SampleClass::get()
-     * @expectedException Phossa2\Storage\Exception\LogicException
-     * @expectedExceptionCode Phossa2\Storage\Message\Message::PACKAGE_CONST
      */
     public function testGet()
     {

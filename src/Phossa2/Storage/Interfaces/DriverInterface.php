@@ -38,7 +38,7 @@ interface DriverInterface
      *
      * @param  string $path
      * @param  bool $stream
-     * @return string|resource|array
+     * @return string|resource|array|null
      * @access public
      */
     public function getContent(/*# string */ $path, /*# bool */ $stream = false);

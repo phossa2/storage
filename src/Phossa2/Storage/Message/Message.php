@@ -57,6 +57,56 @@ class Message extends BaseMessage
      */
     const STR_FS_NONDELETABLE = 1607250955;
 
+    /*
+     * Create directory "%s" failed
+     */
+    const STR_MKDIR_FAIL = 1607250956;
+
+    /*
+     * Read directory "%s" failed
+     */
+    const STR_READDIR_FAIL = 1607250957;
+
+    /*
+     * Open stream "%s" failed
+     */
+    const STR_OPENSTREAM_FAIL = 1607250958;
+
+    /*
+     * Read file "%s" failed
+     */
+    const STR_READFILE_FAIL = 1607250959;
+
+    /*
+     * Get meta for file "%s" failed
+     */
+    const STR_GETMETA_FAIL = 1607250960;
+
+    /*
+     * Write file "%s" failed
+     */
+    const STR_WRITEFILE_FAIL = 1607250961;
+
+    /*
+     * Rename "%s" to "%s" failed
+     */
+    const STR_RENAME_FAIL = 1607250962;
+
+    /*
+     * Set meta for file "%s" failed
+     */
+    const STR_SETMETA_FAIL = 1607250963;
+
+    /*
+     * Copy "%s" to "%s" failed
+     */
+    const STR_COPY_FAIL = 1607250964;
+
+    /*
+     * Delete "%s" failed
+     */
+    const STR_DELETE_FAIL = 1607250965;
+
     /**
      * {@inheritDoc}
      */
@@ -67,5 +117,15 @@ class Message extends BaseMessage
         self::STR_FS_NONREADABLE => 'Filesystem "%s" not readable',
         self::STR_FS_NONWRITABLE => 'Filesystem "%s" not writable',
         self::STR_FS_NONDELETABLE => 'Filesystem "%s" not deletable',
+        self::STR_MKDIR_FAIL => 'Create directory "%s" failed',
+        self::STR_READDIR_FAIL => 'Read directory "%s" failed',
+        self::STR_OPENSTREAM_FAIL => 'Open stream "%s" failed',
+        self::STR_READFILE_FAIL => 'Read file "%s" failed',
+        self::STR_GETMETA_FAIL => 'Get meta for file "%s" failed',
+        self::STR_WRITEFILE_FAIL => 'Write file "%s" failed',
+        self::STR_RENAME_FAIL => 'Rename "%s" to "%s" failed',
+        self::STR_SETMETA_FAIL => 'Set meta for file "%s" failed',
+        self::STR_COPY_FAIL => 'Copy "%s" to "%s" failed',
+        self::STR_DELETE_FAIL => 'Delete "%s" failed',
     ];
 }
