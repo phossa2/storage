@@ -260,7 +260,8 @@ class LocalDriver extends DriverAbstract
             $f = $from . \DIRECTORY_SEPARATOR . $file;
             $t = $to . \DIRECTORY_SEPARATOR . $file;
             if (is_dir($f)) {
-                $res = $this->fixPath($t) && $this->copyDir($f, $t);
+                $this->makeDirectory($t);
+                $res = $this->copyDir($f, $t);
             } else {
                 $res = $this->copyFile($f, $t);
             }
