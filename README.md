@@ -79,7 +79,7 @@ Dependencies
 
 - PHP >= 5.4.0
 
-- phossa2/shared >= 2.0.21
+- phossa2/shared >= 2.0.23
 
 License
 ---
