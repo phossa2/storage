@@ -43,7 +43,7 @@ interface StorageInterface extends MountableInterface
      *
      * @param  string $path
      * @param  bool $stream return a stream to read from
-     * @return null|string|array|stream
+     * @return null|string|array|resource
      * @access public
      * @api
      */

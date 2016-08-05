@@ -82,19 +82,21 @@ class LocalDriver extends DriverAbstract
         /*# string */ $realPath,
         /*# string */ $prefix = ''
     )/*# : array */ {
-        $res = [];
         try {
+            $res = [];
             foreach (new \DirectoryIterator($realPath) as $fileInfo) {
                 if($fileInfo->isDot()) continue;
                 $res[] = $prefix . $fileInfo->getFilename();
             }
+            return $res;
+
         } catch (\Exception $e) {
             $this->setError(
                 Message::get(Message::STR_READDIR_FAIL, $realPath),
                 Message::STR_READDIR_FAIL
             );
+            return [];
         }
-        return $res;
     }
 
     /**
@@ -158,10 +160,15 @@ class LocalDriver extends DriverAbstract
     /**
      * {@inheritDoc}
      */
-    protected function fixPath(/*# string */ $realPath)/*# : bool */
+    protected function fixPath()/*# : bool */
     {
-        $parent = dirname($realPath);
-        return $this->makeDirectory($parent);
+        foreach (func_get_args() as $realPath) {
+            $parent = dirname($realPath);
+            if (!$this->makeDirectory($parent)) {
+                return false;
+            }
+        }
+        return true;
     }
 
     /**
@@ -248,6 +255,7 @@ class LocalDriver extends DriverAbstract
         /*# string */ $to
     )/*# : bool */ {
         $files = $this->readDir($from);
+
         foreach ($files as $file) {
             $f = $from . \DIRECTORY_SEPARATOR . $file;
             $t = $to . \DIRECTORY_SEPARATOR . $file;
@@ -279,6 +287,7 @@ class LocalDriver extends DriverAbstract
     protected function deleteDir(/*# string */ $realPath)/*# : bool */
     {
         $files = $this->readDir($realPath, $realPath);
+
         foreach ($files as $file) {
             if (is_dir($file)) {
                 $res = $this->deleteDir($file);

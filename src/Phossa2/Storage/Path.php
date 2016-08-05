@@ -123,13 +123,13 @@ class Path extends ObjectAbstract implements PathInterface, ErrorAwareInterface,
      */
     public function getMeta()/*# : array */
     {
-        if (!$this->exists()) {
+        if ($this->exists()) {
+            $res = $this->getFilesystem()->getDriver()->getMeta($this->path);
+            $this->copyError($this->getFilesystem()->getDriver());
+            return $res;
+        } else {
             return [];
         }
-
-        $res = $this->getFilesystem()->getDriver()->getMeta($this->path);
-        $this->copyError($this->getFilesystem()->getDriver());
-        return $res;
     }
 
     /**
@@ -145,14 +145,13 @@ class Path extends ObjectAbstract implements PathInterface, ErrorAwareInterface,
      */
     public function setContent($content)/*# : bool */
     {
-        // filesystem writable ?
-        if (!$this->isFilesystemWritable()) {
-            return false;
+        if ($this->isFilesystemWritable()) {
+            $res = $this->getFilesystem()->getDriver()
+                ->setContent($this->path, $content);
+            $this->copyError($this->getFilesystem()->getDriver());
+            return $res;
         }
-
-        $res = $this->getFilesystem()->getDriver()->setContent($this->path, $content);
-        $this->copyError($this->getFilesystem()->getDriver());
-        return $res;
+        return false;
     }
 
     /**
@@ -177,13 +176,7 @@ class Path extends ObjectAbstract implements PathInterface, ErrorAwareInterface,
      */
     public function rename(/*# string */ $destination)/*# : bool */
     {
-        if (!$this->exists() || !$this->isFilesystemWritable()) {
-            return false;
-        }
-
-        $res = $this->getFilesystem()->getDriver()->rename($this->path, $destination);
-        $this->copyError($this->getFilesystem()->getDriver());
-        return $res;
+        return $this->action($destination, 'rename');
     }
 
     /**
@@ -191,13 +184,7 @@ class Path extends ObjectAbstract implements PathInterface, ErrorAwareInterface,
      */
     public function copy(/*# string */ $destination)/*# : bool */
     {
-        if (!$this->exists() || !$this->isFilesystemWritable()) {
-            return false;
-        }
-
-        $res = $this->getFilesystem()->getDriver()->copy($this->path, $destination);
-        $this->copyError($this->getFilesystem()->getDriver());
-        return $res;
+        return $this->action($destination, 'copy');
     }
 
     /**
@@ -215,5 +202,80 @@ class Path extends ObjectAbstract implements PathInterface, ErrorAwareInterface,
             return $res;
         }
         return true;
+    }
+
+    /**
+     * Do copy or rename
+     *
+     * @param  string $destination
+     * @param  string $action 'copy' or 'rename'
+     * @return bool
+     * @access protected
+     */
+    protected function action(
+        /*# string */ $destination,
+        /*# string */ $action
+    )/*# : bool */ {
+        if (!$this->exists() || !$this->isFilesystemWritable()) {
+            return false;
+        }
+
+        $res = $this->getFilesystem()->getDriver()->{$action}($this->path, $destination);
+        $this->copyError($this->getFilesystem()->getDriver());
+        return (bool) $res;
+    }
+
+    /**
+     * Check filesystem readable or not
+     *
+     * @return bool
+     * @access protected
+     */
+    protected function isFilesystemReadable()/*# : bool */
+    {
+        if ($this->getFilesystem()->isReadable()) {
+            return true;
+        } else {
+            return $this->setError(
+                Message::get(Message::STR_FS_NONREADABLE, $this->full),
+                Message::STR_FS_NONREADABLE
+            );
+        }
+    }
+
+    /**
+     * Check filesystem writable or not
+     *
+     * @return bool
+     * @access protected
+     */
+    protected function isFilesystemWritable()/*# : bool */
+    {
+        if ($this->getFilesystem()->isWritable()) {
+            return true;
+        } else {
+            return $this->setError(
+                Message::get(Message::STR_FS_NONWRITABLE, $this->full),
+                Message::STR_FS_NONWRITABLE
+            );
+        }
+    }
+
+    /**
+     * Check filesystem file deletable or not
+     *
+     * @return bool
+     * @access protected
+     */
+    protected function isFilesystemDeletable()/*# : bool */
+    {
+        if ($this->getFilesystem()->isDeletable()) {
+            return true;
+        } else {
+            return $this->setError(
+                Message::get(Message::STR_FS_NONDELETABLE, $this->full),
+                Message::STR_FS_NONDELETABLE
+            );
+        }
     }
 }

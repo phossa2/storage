@@ -123,17 +123,11 @@ class Storage extends ObjectAbstract implements StorageInterface, PathAwareInter
         }
 
         $content = $this->get($from);
-
         if (is_null($content)) {
-            // read error
             return false;
-
         } elseif (is_array($content)) {
-            // copy directory
             return $this->copyDir($content, $to);
-
         } else {
-            // write $to
             return $this->put($to, $content);
         }
     }

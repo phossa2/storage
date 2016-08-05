@@ -142,7 +142,7 @@ abstract class DriverAbstract extends ObjectAbstract implements DriverInterface,
         $real_from = $this->realPath($from);
         $real_to = $this->realPath($to);
 
-        if ($this->fixPath($real_from) && $this->fixPath($real_to)) {
+        if ($this->fixPath($real_from, $real_to)) {
             if ($this->isDir($real_from)) {
                 $res = $this->renameDir($real_from, $real_to);
             } else {
@@ -165,7 +165,7 @@ abstract class DriverAbstract extends ObjectAbstract implements DriverInterface,
         $real_from = $this->realPath($from);
         $real_to = $this->realPath($to);
 
-        if ($this->fixPath($real_from) && $this->fixPath($real_to)) {
+        if ($this->fixPath($real_from, $real_to)) {
             if ($this->isDir($real_from)) {
                 $res = $this->copyDir($real_from, $real_to);
             } else {
@@ -228,7 +228,7 @@ abstract class DriverAbstract extends ObjectAbstract implements DriverInterface,
      *
      * @param  string $realPath
      * @param  string $prefix prefix to prepend to the results
-     * @return array|null
+     * @return array
      * @access protected
      */
     abstract protected function readDir(
@@ -264,13 +264,12 @@ abstract class DriverAbstract extends ObjectAbstract implements DriverInterface,
     abstract protected function getRealMeta(/*# string */ $realPath)/*# : array */;
 
     /**
-     * Make sure parent path exists
+     * Make sure path directory exits.
      *
-     * @param  string $realPath
      * @return bool
      * @access protected
      */
-    abstract protected function fixPath(/*# string */ $realPath)/*# : bool */;
+    abstract protected function fixPath()/*# : bool */;
 
     /**
      * Write to file from stream
@@ -315,7 +314,7 @@ abstract class DriverAbstract extends ObjectAbstract implements DriverInterface,
      * Rename directory
      *
      * @param  string $from
-     * @param  strign $to
+     * @param  string $to
      * @return bool
      * @access protected
      */
@@ -328,7 +327,7 @@ abstract class DriverAbstract extends ObjectAbstract implements DriverInterface,
      * Rename file
      *
      * @param  string $from
-     * @param  strign $to
+     * @param  string $to
      * @return bool
      * @access protected
      */
@@ -341,7 +340,7 @@ abstract class DriverAbstract extends ObjectAbstract implements DriverInterface,
      * Copy directory
      *
      * @param  string $from
-     * @param  strign $to
+     * @param  string $to
      * @return bool
      * @access protected
      */
@@ -354,7 +353,7 @@ abstract class DriverAbstract extends ObjectAbstract implements DriverInterface,
      * Copy file
      *
      * @param  string $from
-     * @param  strign $to
+     * @param  string $to
      * @return bool
      * @access protected
      */
