@@ -16,11 +16,11 @@ namespace Phossa2\Storage;
 
 use Phossa2\Storage\Message\Message;
 use Phossa2\Shared\Base\ObjectAbstract;
+use Phossa2\Shared\Error\ErrorAwareTrait;
 use Phossa2\Storage\Traits\PathAwareTrait;
 use Phossa2\Shared\Error\ErrorAwareInterface;
 use Phossa2\Storage\Interfaces\StorageInterface;
 use Phossa2\Shared\Extension\ExtensionAwareTrait;
-use Phossa2\Storage\Interfaces\PathAwareInterface;
 use Phossa2\Shared\Extension\ExtensionAwareInterface;
 
 /**
@@ -30,15 +30,14 @@ use Phossa2\Shared\Extension\ExtensionAwareInterface;
  * @author  Hong Zhang <phossa@126.com>
  * @see     ObjectAbstract
  * @see     StorageInterface
- * @see     PathAwareInterface
  * @see     ErrorAwareInterface
  * @see     ExtensionAwareInterface
  * @version 2.0.0
  * @since   2.0.0 added
  */
-class Storage extends ObjectAbstract implements StorageInterface, PathAwareInterface, ErrorAwareInterface, ExtensionAwareInterface
+class Storage extends ObjectAbstract implements StorageInterface, ErrorAwareInterface, ExtensionAwareInterface
 {
-    use PathAwareTrait, ExtensionAwareTrait;
+    use PathAwareTrait, ErrorAwareTrait, ExtensionAwareTrait;
 
     /**
      * {@inheritDoc}
@@ -65,10 +64,10 @@ class Storage extends ObjectAbstract implements StorageInterface, PathAwareInter
         $obj = $this->path($path);
         $res = $obj->getContent($stream);
 
-        // append mount point if directory
+        // append mount point if result is array
         if (is_array($res)) {
             return $this->prependMountPoint(
-                $res, $this->getMountPoint($this->normalize($path))
+                $res, $this->getMountPoint($obj->getFullPath())
             );
         }
 

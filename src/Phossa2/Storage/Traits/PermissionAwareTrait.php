@@ -50,8 +50,7 @@ trait PermissionAwareTrait
      */
     public function setPermissions(/*# int */ $permissions)
     {
-        // compatible with future upgrades
-        $this->perm = $permissions | PermissionAwareInterface::PERM_OTHER;
+        $this->perm = $permissions;
         return $this;
     }
 

@@ -38,6 +38,8 @@ class Filesystem extends ObjectAbstract implements FilesystemInterface
     use PermissionAwareTrait, DriverAwareTrait;
 
     /**
+     * Set the driver and its global permissions
+     *
      * @param  DriverInterface $driver
      * @param  int $permissions filesystem permissions
      * @access public
@@ -45,7 +47,7 @@ class Filesystem extends ObjectAbstract implements FilesystemInterface
      */
     public function __construct(
         DriverInterface $driver,
-        int $permissions = PermissionAwareInterface::PERM_ALL
+        /*# int */ $permissions = PermissionAwareInterface::PERM_ALL
     ) {
         // set underlying driver
         $this->setDriver($driver);

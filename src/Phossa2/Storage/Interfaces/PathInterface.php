@@ -62,6 +62,14 @@ interface PathInterface
     public function getPath()/*# : string */;
 
     /**
+     * Get the full path with mount point
+     *
+     * @return string
+     * @access public
+     */
+    public function getFullPath()/*# : string */;
+
+    /**
      * Set content of this path
      *
      * @param  string|resource $content

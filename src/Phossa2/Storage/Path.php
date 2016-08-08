@@ -50,7 +50,7 @@ class Path extends ObjectAbstract implements PathInterface, ErrorAwareInterface,
     protected $full;
 
     /**
-     * relative path with no leading '/' and without mount point prefix
+     * relative path without mount point prefix
      *
      * @var    string
      * @access protected
@@ -143,6 +143,14 @@ class Path extends ObjectAbstract implements PathInterface, ErrorAwareInterface,
     /**
      * {@inheritDoc}
      */
+    public function getFullPath()/*# : string */
+    {
+        return $this->full;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
     public function setContent($content)/*# : bool */
     {
         if ($this->isFilesystemWritable()) {
@@ -159,7 +167,7 @@ class Path extends ObjectAbstract implements PathInterface, ErrorAwareInterface,
      */
     public function setMeta(array $meta)/*# : bool */
     {
-        if (!$this->exists(true)) {
+        if (!$this->exists()) {
             return false;
         }
 

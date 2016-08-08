@@ -20,6 +20,8 @@ use Phossa2\Storage\Interfaces\PathAwareInterface;
 /**
  * PathAwareTrait
  *
+ * Implementation of PathAwareInterface
+ *
  * @package Phossa2\Storage
  * @author  Hong Zhang <phossa@126.com>
  * @see     PathAwareInterface
@@ -31,9 +33,9 @@ trait PathAwareTrait
     use MountableTrait;
 
     /**
-     * Temp cache of Path objects
+     * cache of Path objects
      *
-     * @var    array
+     * @var    Path[]
      * @access protected
      */
     protected $path_cache = [];
@@ -43,29 +45,48 @@ trait PathAwareTrait
      */
     public function path(/*# string */ $path)/*# : Path */
     {
+        // unique key
+        $key = $this->getCacheKey($path);
+
         // try cache
-        $obj = $this->getFromCache($path);
-        if (is_object($obj)) {
-            return $obj;
+        if ($this->hasPathCache($key)) {
+            return $this->getFromCache($key);
         }
 
         // new Path object
         $obj = $this->newPath($this->normalize($path));
 
         // save to cache
-        $this->saveToCache($path, $obj);
+        $this->saveToCache($key, $obj);
 
         return $obj;
     }
 
     /**
-     * Generate Path object
+     * Normalize the path
+     *
+     * Replaces '.', '..', prepends '/', keeps trailing '/'
+     *
+     * @param  string $path
+     * @return string
+     * @access protected
+     */
+    protected function normalize(/*# string */ $path)/*# : string */
+    {
+        $pattern = ['~/{2,}~', '~/(\./)+~', '~([^/\.]+/(?R)*\.{2,}/)~', '~\.\./~'];
+        $replace = ['/', '/', '', ''];
+        return preg_replace($pattern, $replace, '/' . ltrim($path, '/'));
+    }
+
+    /**
+     * Generate Path object. Override this method if you want to
      *
      * @param  string $path
      * @return Path
      * @access protected
      */
-    protected function newPath(/*# string */ $path)/*# : Path */ {
+    protected function newPath(/*# string */ $path)/*# : Path */
+    {
         list($mnt, $remain) = $this->splitPath($path);
         return new Path($path, $remain, $this->getFilesystemAt($mnt));
     }
@@ -104,32 +125,38 @@ trait PathAwareTrait
     }
 
     /**
-     * Get Path object from local cache
+     * Is this path in cache ?
      *
-     * @param  string $path
-     * @return false|Path
+     * @param  string $key
+     * @return bool
      * @access protected
      */
-    protected function getFromCache(/*# string */ $path)
+    protected function hasPathCache(/*# string */ $key)/*# : bool */
     {
-        $key = $this->getCacheKey($path);
-        if (isset($this->path_cache[$key[0]][$key])) {
-            return $this->path_cache[$key[0]][$key];
-        }
-        return false;
+        return isset($this->path_cache[$key[0]][$key]);
+    }
+
+    /**
+     * Get Path object from local cache
+     *
+     * @param  string $key
+     * @return Path
+     * @access protected
+     */
+    protected function getFromCache(/*# string */ $key)
+    {
+        return $this->path_cache[$key[0]][$key];
     }
 
     /**
      * Save Path object to local cache
      *
-     * @param  string $path
+     * @param  string $key
      * @param  object $obj
      * @access protected
      */
-    protected function saveToCache(/*# string */ $path, $obj)
+    protected function saveToCache(/*# string */ $key, $obj)
     {
-        $key = $this->getCacheKey($path);
-
         // clear stale cache
         if (isset($this->path_cache[$key[0]]) &&
             sizeof($this->path_cache[$key[0]]) > 1

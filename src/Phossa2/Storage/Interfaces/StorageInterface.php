@@ -20,13 +20,14 @@ namespace Phossa2\Storage\Interfaces;
  * @package Phossa2\Storage
  * @author  Hong Zhang <phossa@126.com>
  * @see     MountableInterface
+ * @see     PathAwareInterface
  * @version 2.0.0
  * @since   2.0.0 added
  */
-interface StorageInterface extends MountableInterface
+interface StorageInterface extends MountableInterface, PathAwareInterface
 {
     /**
-     * Check a path exists or not
+     * Check an absolute path exists or not
      *
      * @param  string $path
      * @return bool
@@ -38,8 +39,9 @@ interface StorageInterface extends MountableInterface
     /**
      * Read content from the path
      *
-     * - if is file, returns the content
-     * - if is dir, returns array of paths
+     * - if not found or not readable, returns NULL
+     * - if is file, returns the STRING
+     * - if is directory, returns ARRAY of paths
      *
      * @param  string $path
      * @param  bool $stream return a stream to read from
@@ -50,7 +52,7 @@ interface StorageInterface extends MountableInterface
     public function get(/*# string */ $path, /*# bool */ $stream = false);
 
     /**
-     * Write content or meta data to the path
+     * Write content and meta data to the path
      *
      * @param  string $path
      * @param  string|resource|null $content
@@ -66,7 +68,9 @@ interface StorageInterface extends MountableInterface
     )/*# : bool */;
 
     /**
-     * Get meta data of the path
+     * Get meta data of the path。
+     *
+     * Returns empty [] if not found
      *
      * @param  string $path
      * @return array
@@ -106,7 +110,6 @@ interface StorageInterface extends MountableInterface
     /**
      * Delete the specified path
      *
-     * - If path is a link, delete the link only
      * - If path is a dir, recursively remove all
      *
      * @param  string $path

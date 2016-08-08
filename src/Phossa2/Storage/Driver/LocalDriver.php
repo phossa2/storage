@@ -56,7 +56,8 @@ class LocalDriver extends DriverAbstract
      */
     protected function realPath(/*# string */ $path)/*# : string */
     {
-        return $this->root . str_replace('/', \DIRECTORY_SEPARATOR, $path);
+        return $this->root . ('/' !== \DIRECTORY_SEPARATOR ?
+            str_replace('/', \DIRECTORY_SEPARATOR, $path) : $path);
     }
 
     /**
@@ -142,7 +143,6 @@ class LocalDriver extends DriverAbstract
         try {
             $info = new \SplFileInfo($realPath);
             return [
-                'type'  => $info->getType(),
                 'size'  => $info->getSize(),
                 'perm'  => $info->getPerms(),
                 'ctime' => $info->getCTime(),
@@ -160,13 +160,11 @@ class LocalDriver extends DriverAbstract
     /**
      * {@inheritDoc}
      */
-    protected function fixPath()/*# : bool */
+    protected function ensurePath(/*# string */ $realPath)/*# : bool */
     {
-        foreach (func_get_args() as $realPath) {
-            $parent = dirname($realPath);
-            if (!$this->makeDirectory($parent)) {
-                return false;
-            }
+        $parent = dirname($realPath);
+        if (!$this->makeDirectory($parent)) {
+            return false;
         }
         return true;
     }

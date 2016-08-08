@@ -15,7 +15,6 @@
 namespace Phossa2\Storage\Traits;
 
 use Phossa2\Storage\Message\Message;
-use Phossa2\Shared\Error\ErrorAwareTrait;
 use Phossa2\Storage\Exception\LogicException;
 use Phossa2\Storage\Interfaces\MountableInterface;
 use Phossa2\Storage\Interfaces\FilesystemInterface;
@@ -33,8 +32,6 @@ use Phossa2\Storage\Interfaces\FilesystemInterface;
  */
 trait MountableTrait
 {
-    use ErrorAwareTrait;
-
     /**
      * filesystem map
      *
@@ -51,7 +48,7 @@ trait MountableTrait
         FilesystemInterface $filesystem
     )/*# : bool */ {
         // normalize mount point
-        $mp = $this->normalize($mountPoint);
+        $mp = $this->cleanMountPoint($mountPoint);
 
         // mounted already
         if (isset($this->filesystems[$mp])) {
@@ -71,7 +68,7 @@ trait MountableTrait
     public function umount(/*# string */ $mountPoint)/*# : bool */
     {
         // normalize mount point
-        $mp = $this->normalize($mountPoint);
+        $mp = $this->cleanMountPoint($mountPoint);
 
         // not mounted
         if (!isset($this->filesystems[$mp])) {
@@ -88,19 +85,15 @@ trait MountableTrait
     }
 
     /**
-     * Normalize the path
-     *
-     * Replaces '.' and '..'  prepends '/' etc.
+     * Clean path to standard mount point
      *
      * @param  string $path
      * @return string
      * @access protected
      */
-    protected function normalize(/*# string */ $path)/*# : string */
+    protected function cleanMountPoint(/*# string */ $path)/*# : string */
     {
-        $pattern = ['~/{2,}~', '~/(\./)+~', '~([^/\.]+/(?R)*\.{2,}/)~', '~\.\./~'];
-        $replace = ['/', '/', '', ''];
-        return preg_replace($pattern, $replace, '/' . trim($path, " \t\r\n/"));
+        return '/' . trim($path, " \t\r\n/");
     }
 
     /**

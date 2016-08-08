@@ -17,7 +17,7 @@ namespace Phossa2\Storage\Interfaces;
 /**
  * FilesystemInterface
  *
- * Consists of driver and permissions for the driver
+ * Consists of a specific driver and the global permissions for the driver
  *
  * @package Phossa2\Storage
  * @author  Hong Zhang <phossa@126.com>

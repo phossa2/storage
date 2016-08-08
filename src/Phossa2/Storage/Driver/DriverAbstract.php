@@ -61,7 +61,6 @@ abstract class DriverAbstract extends ObjectAbstract implements DriverInterface,
     public function getContent(/*# string */ $path, /*# bool */ $stream = false)
     {
         $real = $this->realPath($path);
-
         if ($this->isDir($real)) {
             return $this->readDir($real, rtrim($path, '/\\') . '/');
 
@@ -81,7 +80,7 @@ abstract class DriverAbstract extends ObjectAbstract implements DriverInterface,
         $real = $this->realPath($path);
 
         if ($this->isDir($real)) {
-            return ['type' => 'dir'];
+            return [];
 
         } elseif ($this->use_metafile) {
             $meta = $this->readFile($real . '.meta');
@@ -99,7 +98,7 @@ abstract class DriverAbstract extends ObjectAbstract implements DriverInterface,
     {
         $real = $this->realPath($path);
 
-        if ($this->fixPath($real)) {
+        if ($this->ensurePath($real)) {
             if (is_resource($content)) {
                 $res = $this->writeStream($real, $content);
             } else {
@@ -142,7 +141,7 @@ abstract class DriverAbstract extends ObjectAbstract implements DriverInterface,
         $real_from = $this->realPath($from);
         $real_to = $this->realPath($to);
 
-        if ($this->fixPath($real_from, $real_to)) {
+        if ($this->ensurePath($real_to)) {
             if ($this->isDir($real_from)) {
                 $res = $this->renameDir($real_from, $real_to);
             } else {
@@ -165,7 +164,7 @@ abstract class DriverAbstract extends ObjectAbstract implements DriverInterface,
         $real_from = $this->realPath($from);
         $real_to = $this->realPath($to);
 
-        if ($this->fixPath($real_from, $real_to)) {
+        if ($this->ensurePath($real_to)) {
             if ($this->isDir($real_from)) {
                 $res = $this->copyDir($real_from, $real_to);
             } else {
@@ -191,7 +190,7 @@ abstract class DriverAbstract extends ObjectAbstract implements DriverInterface,
             return $this->deleteDir($real);
         } else {
             if ($this->use_metafile) {
-                return $this->deleteFile($real . '.meta');
+                $this->deleteFile($real . '.meta');
             }
             return $this->deleteFile($real);
         }
@@ -266,10 +265,11 @@ abstract class DriverAbstract extends ObjectAbstract implements DriverInterface,
     /**
      * Make sure path directory exits.
      *
+     * @param  string $realPath
      * @return bool
      * @access protected
      */
-    abstract protected function fixPath()/*# : bool */;
+    abstract protected function ensurePath(/*# string */ $realPath)/*# : bool */;
 
     /**
      * Write to file from stream

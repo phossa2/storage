@@ -20,6 +20,8 @@ use Phossa2\Storage\Interfaces\FilesystemAwareInterface;
 /**
  * FilesystemAwareTrait
  *
+ * Implementation of FilesystemAwareInterface
+ *
  * @package Phossa2\Storage
  * @author  Hong Zhang <phossa@126.com>
  * @see     FilesystemAwareInterface
