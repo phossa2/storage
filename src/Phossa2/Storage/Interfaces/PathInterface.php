@@ -27,12 +27,11 @@ interface PathInterface
     /**
      * Does this path exist ?
      *
-     * @param  bool $check force checking instead of using cached result
      * @return bool
      * @access public
      * @api
      */
-    public function exists(/*# bool */ $check = false)/*# : bool */;
+    public function exists()/*# : bool */;
 
     /**
      * Get content from the path

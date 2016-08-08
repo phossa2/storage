@@ -58,14 +58,6 @@ class Path extends ObjectAbstract implements PathInterface, ErrorAwareInterface,
     protected $path;
 
     /**
-     * cached exists flag
-     *
-     * @var    bool
-     * @access protected
-     */
-    protected $exists;
-
-    /**
      * Instantiate the path object
      *
      * @param  string $full full path
@@ -87,20 +79,16 @@ class Path extends ObjectAbstract implements PathInterface, ErrorAwareInterface,
     /**
      * {@inheritDoc}
      */
-    public function exists(/*# bool */ $check = false)/*# : bool */
+    public function exists()/*# : bool */
     {
-        if ($check || !is_bool($this->exists)) {
-            $this->exists = $this->getFilesystem()->getDriver()->exists($this->path);
-        }
-
-        if (!$this->exists) {
-            $this->setError(
+        if (!$this->getFilesystem()->getDriver()->exists($this->path)) {
+            return $this->setError(
                 Message::get(Message::MSG_PATH_NOTFOUND, $this->full),
                 Message::MSG_PATH_NOTFOUND
             );
         }
 
-        return $this->exists;
+        return true;
     }
 
     /**

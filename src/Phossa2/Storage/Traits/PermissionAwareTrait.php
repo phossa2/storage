@@ -59,7 +59,7 @@ trait PermissionAwareTrait
      */
     public function isReadable()/*# : bool */
     {
-        return (bool) $this->perm & PermissionAwareInterface::PERM_READ;
+        return (bool) ($this->perm & PermissionAwareInterface::PERM_READ);
     }
 
     /**
@@ -67,7 +67,7 @@ trait PermissionAwareTrait
      */
     public function isWritable()/*# : bool */
     {
-        return (bool) $this->perm & PermissionAwareInterface::PERM_WRITE;
+        return (bool) ($this->perm & PermissionAwareInterface::PERM_WRITE);
     }
 
     /**
@@ -75,6 +75,6 @@ trait PermissionAwareTrait
      */
     public function isDeletable()/*# : bool */
     {
-        return (bool) $this->perm & PermissionAwareInterface::PERM_DELETE;
+        return (bool) ($this->perm & PermissionAwareInterface::PERM_DELETE);
     }
 }

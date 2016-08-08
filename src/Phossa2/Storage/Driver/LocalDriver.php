@@ -16,6 +16,7 @@ namespace Phossa2\Storage\Driver;
 
 use Phossa2\Storage\Message\Message;
 use Phossa2\Storage\Exception\LogicException;
+use Phossa2\Storage\Interfaces\PermissionAwareInterface;
 
 /**
  * LocalDriver
@@ -144,7 +145,7 @@ class LocalDriver extends DriverAbstract
             $info = new \SplFileInfo($realPath);
             return [
                 'size'  => $info->getSize(),
-                'perm'  => $info->getPerms(),
+                'perm'  => $info->getPerms() & PermissionAwareInterface::PERM_ALL,
                 'ctime' => $info->getCTime(),
                 'mtime' => $info->getMTime(),
             ];
@@ -177,11 +178,14 @@ class LocalDriver extends DriverAbstract
         $resource
     )/*# : bool */ {
         $tmpfname = tempnam(dirname($realPath), 'FOO');
-        $stream = fopen($tmpfname, 'w+b');
-
-        if (is_resource($stream)) {
-            stream_copy_to_stream($resource, $stream);
-            return fclose($stream) && rename($tmpfname, $realPath);
+        if (false !== $tmpfname) {
+            $stream = fopen($tmpfname, 'w+b');
+            if (is_resource($stream)) {
+                stream_copy_to_stream($resource, $stream);
+                fclose($stream);
+                return rename($tmpfname, $realPath) &&
+                    chmod($realPath, PermissionAwareInterface::PERM_ALL);
+            }
         }
         return false;
     }
@@ -195,26 +199,27 @@ class LocalDriver extends DriverAbstract
     )/*# : bool */ {
         // write to a temp file
         $tmpfname = tempnam(dirname($realPath), 'FOO');
-        $handle = fopen($tmpfname, 'w');
-        fwrite($handle, $content);
-        fclose($handle);
+        if (false !== $tmpfname) {
+            $handle = fopen($tmpfname, 'w');
+            fwrite($handle, $content);
+            fclose($handle);
 
-        // rename to $realPath
-        return rename($tmpfname, $realPath);
+            // rename to $realPath
+            return rename($tmpfname, $realPath) &&
+                chmod($realPath, PermissionAwareInterface::PERM_ALL);
+        }
+        return false;
     }
 
     /**
-     * Write meta data
-     *
-     * @param  string $realPath
-     * @param  array $meta
-     * @return bool
-     * @access protected
+     * {@inheritDoc}
      */
     protected function setRealMeta(
         /*# string */ $realPath,
         array $meta
     )/*# : bool */ {
+        clearstatcache(true, $realPath);
+
         if (isset($meta['mtime'])) {
             touch($realPath, $meta['mtime']);
         }
@@ -285,7 +290,8 @@ class LocalDriver extends DriverAbstract
      */
     protected function deleteDir(/*# string */ $realPath)/*# : bool */
     {
-        $files = $this->readDir($realPath, $realPath);
+        $pref  = rtrim($realPath, '/\\') . \DIRECTORY_SEPARATOR;
+        $files = $this->readDir($realPath, $pref);
 
         foreach ($files as $file) {
             if (is_dir($file)) {

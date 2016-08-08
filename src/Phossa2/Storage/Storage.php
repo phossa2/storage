@@ -22,6 +22,7 @@ use Phossa2\Shared\Error\ErrorAwareInterface;
 use Phossa2\Storage\Interfaces\StorageInterface;
 use Phossa2\Shared\Extension\ExtensionAwareTrait;
 use Phossa2\Shared\Extension\ExtensionAwareInterface;
+use Phossa2\Storage\Interfaces\FilesystemInterface;
 
 /**
  * Storage
@@ -38,6 +39,18 @@ use Phossa2\Shared\Extension\ExtensionAwareInterface;
 class Storage extends ObjectAbstract implements StorageInterface, ErrorAwareInterface, ExtensionAwareInterface
 {
     use PathAwareTrait, ErrorAwareTrait, ExtensionAwareTrait;
+
+    /**
+     * @param  string $mountPoint
+     * @param  FilesystemInterface $filesystem
+     * @access public
+     */
+    public function __construct(
+        /*# string */ $mountPoint,
+        FilesystemInterface $filesystem
+    ) {
+        $this->mount($mountPoint, $filesystem);
+    }
 
     /**
      * {@inheritDoc}
