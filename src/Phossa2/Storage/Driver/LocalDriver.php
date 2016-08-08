@@ -15,6 +15,7 @@
 namespace Phossa2\Storage\Driver;
 
 use Phossa2\Storage\Message\Message;
+use Phossa2\Storage\Traits\LocalDirTrait;
 use Phossa2\Storage\Exception\LogicException;
 use Phossa2\Storage\Interfaces\PermissionAwareInterface;
 
@@ -29,6 +30,8 @@ use Phossa2\Storage\Interfaces\PermissionAwareInterface;
  */
 class LocalDriver extends DriverAbstract
 {
+    use LocalDirTrait;
+
     /**
      * driver root
      *
@@ -67,38 +70,6 @@ class LocalDriver extends DriverAbstract
     protected function realExists(/*# string */ $realPath)/*# : bool */
     {
         return file_exists($realPath);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    protected function isDir(/*# string */ $realPath)/*# : bool */
-    {
-        return is_dir($realPath);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    protected function readDir(
-        /*# string */ $realPath,
-        /*# string */ $prefix = ''
-    )/*# : array */ {
-        try {
-            $res = [];
-            foreach (new \DirectoryIterator($realPath) as $fileInfo) {
-                if($fileInfo->isDot()) continue;
-                $res[] = $prefix . $fileInfo->getFilename();
-            }
-            return $res;
-
-        } catch (\Exception $e) {
-            $this->setError(
-                Message::get(Message::STR_READDIR_FAIL, $realPath),
-                Message::STR_READDIR_FAIL
-            );
-            return [];
-        }
     }
 
     /**
@@ -233,46 +204,11 @@ class LocalDriver extends DriverAbstract
     /**
      * {@inheritDoc}
      */
-    protected function renameDir(
-        /*# string */ $from,
-        /*# string */ $to
-    )/*# : bool */ {
-        return rename($from, $to);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
     protected function renameFile(
         /*# string */ $from,
         /*# string */ $to
     )/*# : bool */ {
         return rename($from, $to);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    protected function copyDir(
-        /*# string */ $from,
-        /*# string */ $to
-    )/*# : bool */ {
-        $files = $this->readDir($from);
-
-        foreach ($files as $file) {
-            $f = $from . \DIRECTORY_SEPARATOR . $file;
-            $t = $to . \DIRECTORY_SEPARATOR . $file;
-            if (is_dir($f)) {
-                $this->makeDirectory($t);
-                $res = $this->copyDir($f, $t);
-            } else {
-                $res = $this->copyFile($f, $t);
-            }
-            if (false === $res) {
-                return false;
-            }
-        }
-        return true;
     }
 
     /**
@@ -288,56 +224,8 @@ class LocalDriver extends DriverAbstract
     /**
      * {@inheritDoc}
      */
-    protected function deleteDir(/*# string */ $realPath)/*# : bool */
-    {
-        $pref  = rtrim($realPath, '/\\') . \DIRECTORY_SEPARATOR;
-        $files = $this->readDir($realPath, $pref);
-
-        foreach ($files as $file) {
-            if (is_dir($file)) {
-                $res = $this->deleteDir($file);
-            } else {
-                $res = unlink($file);
-            }
-            if (false === $res) {
-                return $this->setError(
-                    Message::get(Message::STR_DELETE_FAIL, $file),
-                    Message::STR_DELETE_FAIL
-                );
-            }
-        }
-        return rmdir($realPath);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
     protected function deleteFile(/*# string */ $realPath)/*# : bool */
     {
         return unlink($realPath);
-    }
-
-    /**
-     * create directory
-     *
-     * @param  string $dir
-     * @access protected
-     */
-    protected function makeDirectory(/*# string */ $dir)/*# : bool */
-    {
-        if (!is_dir($dir)) {
-            $umask = umask(0);
-            mkdir($dir, 0755, true);
-            umask($umask);
-
-            if (!is_dir($dir)) {
-                $this->setError(
-                    Message::get(Message::STR_MKDIR_FAIL, $dir),
-                    Message::STR_MKDIR_FAIL
-                );
-                return false;
-            }
-        }
-        return true;
     }
 }
