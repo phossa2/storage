@@ -77,20 +77,16 @@ trait LocalDirTrait
         /*# string */ $from,
         /*# string */ $to
     )/*# : bool */ {
-        $res = $this->makeDirectory($to);
-
-        $files = $this->readDir($from);
-        foreach ($files as $file) {
-            if (false === $res) {
-                return false;
-            }
-
+        $this->makeDirectory($to);
+        foreach ($this->readDir($from) as $file) {
             $f = $from . \DIRECTORY_SEPARATOR . $file;
             $t = $to . \DIRECTORY_SEPARATOR . $file;
-            if (is_dir($f)) {
-                $res = $this->copyDir($f, $t);
-            } else {
-                $res = @copy($f, $t);
+            $res = is_dir($f) ? $this->copyDir($f, $t) : @copy($f, $t);
+            if (false === $res) {
+                return $this->setError(
+                    Message::get(Message::STR_COPY_FAIL, $f),
+                    Message::STR_COPY_FAIL
+                );
             }
         }
         return $res;
@@ -103,15 +99,9 @@ trait LocalDirTrait
         /*# string */ $realPath,
         /*# bool */ $keep = false
     )/*# : bool */ {
-        $pref  = rtrim($realPath, '/\\') . \DIRECTORY_SEPARATOR;
-        $files = $this->readDir($realPath, $pref);
-
-        foreach ($files as $file) {
-            if (is_dir($file)) {
-                $res = $this->deleteDir($file);
-            } else {
-                $res = unlink($file);
-            }
+        $pref = rtrim($realPath, '/\\') . \DIRECTORY_SEPARATOR;
+        foreach ($this->readDir($realPath, $pref) as $file) {
+            $res = is_dir($file) ? $this->deleteDir($file) : unlink($file);
             if (false === $res) {
                 return $this->setError(
                     Message::get(Message::STR_DELETE_FAIL, $file),
@@ -119,7 +109,6 @@ trait LocalDirTrait
                 );
             }
         }
-
         return $keep ? true : rmdir($realPath);
     }
 

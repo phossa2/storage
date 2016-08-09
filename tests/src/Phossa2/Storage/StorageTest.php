@@ -556,6 +556,7 @@ class StorageTest extends \PHPUnit_Framework_TestCase
         // put
         $this->assertTrue($this->object->put('/b1/bingo1', 'wow1'));
         $this->assertTrue($this->object->put('/b1/b2/bingo2', 'wow2'));
+        $this->assertTrue($this->object->put('/b3', 'wow3'));
 
         // move, directory overwrite file is ok
         $this->assertTrue($this->object->move('/b1', '/b3'));
@@ -567,31 +568,6 @@ class StorageTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals('wow2', $this->object->get('/b3/b2/bingo2'));
 
         // clear
-        $this->assertTrue($this->object->delete('/b3'));
-    }
-
-    /**
-     * Test same filesystem dir move dir over file failure
-     *
-     * @cover Phossa2\Storage\Storage::move()
-     */
-    public function testMove20()
-    {
-        // put
-        $this->assertTrue($this->object->put('/b1/bingo1', 'wow1'));
-        $this->assertTrue($this->object->put('/b1/b2/bingo2', 'wow2'));
-        $this->assertTrue($this->object->put('/b3', 'wow3'));
-
-        // move, directory overwrite file is NOT ok
-        $this->assertFalse($this->object->move('/b1', '/b3'));
-
-        $this->assertTrue($this->object->has('/b1/bingo1'));
-        $this->assertTrue($this->object->has('/b1/b2/bingo2'));
-
-        $this->assertEquals('wow3', $this->object->get('/b3'));
-
-        // clear
-        $this->assertTrue($this->object->delete('/b1'));
         $this->assertTrue($this->object->delete('/b3'));
     }
 
