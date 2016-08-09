@@ -75,7 +75,7 @@ class StorageTest extends \PHPUnit_Framework_TestCase
      *
      * @cover Phossa2\Storage\Storage::has()
      * @cover Phossa2\Storage\Storage::put()
-     * @cover Phossa2\Storage\Storage::delete()
+     * @cover Phossa2\Storage\Storage::del()
      */
     public function testHas()
     {
@@ -87,7 +87,7 @@ class StorageTest extends \PHPUnit_Framework_TestCase
         $this->assertTrue($this->object->has('/bingo'));
 
         // clear
-        $this->assertTrue($this->object->delete('/bingo'));
+        $this->assertTrue($this->object->del('/bingo'));
 
         // not found
         $this->assertFalse($this->object->has('/bingo'));
@@ -113,7 +113,7 @@ class StorageTest extends \PHPUnit_Framework_TestCase
      *
      * @cover Phossa2\Storage\Storage::get()
      * @cover Phossa2\Storage\Storage::put()
-     * @cover Phossa2\Storage\Storage::delete()
+     * @cover Phossa2\Storage\Storage::del()
      */
     public function testGet1()
     {
@@ -125,7 +125,7 @@ class StorageTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals('wow', $this->object->get('/bingo'));
 
         // clear
-        $this->assertTrue($this->object->delete('/bingo'));
+        $this->assertTrue($this->object->del('/bingo'));
 
         // deleted
         $this->assertEquals(null, $this->object->get('/bingo'));
@@ -136,7 +136,7 @@ class StorageTest extends \PHPUnit_Framework_TestCase
      *
      * @cover Phossa2\Storage\Storage::get()
      * @cover Phossa2\Storage\Storage::put()
-     * @cover Phossa2\Storage\Storage::delete()
+     * @cover Phossa2\Storage\Storage::del()
      */
     public function testGet2()
     {
@@ -157,7 +157,7 @@ class StorageTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals('wow', $this->object->get('/b1/b4/b5'));
 
         // delete one sub dir
-        $this->assertTrue($this->object->delete('/b1/b4'));
+        $this->assertTrue($this->object->del('/b1/b4'));
         $this->assertEquals(null, $this->object->get('/b1/b4/b5'));
 
         $this->assertEquals('wow', $this->object->get('/b1/b3'));
@@ -168,7 +168,7 @@ class StorageTest extends \PHPUnit_Framework_TestCase
         );
 
         // clear
-        $this->assertTrue($this->object->delete('/b1'));
+        $this->assertTrue($this->object->del('/b1'));
 
         // deleted
         $this->assertEquals(null, $this->object->get('/b1'));
@@ -179,7 +179,7 @@ class StorageTest extends \PHPUnit_Framework_TestCase
      *
      * @cover Phossa2\Storage\Storage::get()
      * @cover Phossa2\Storage\Storage::put()
-     * @cover Phossa2\Storage\Storage::delete()
+     * @cover Phossa2\Storage\Storage::del()
      */
     public function testGet3()
     {
@@ -195,7 +195,7 @@ class StorageTest extends \PHPUnit_Framework_TestCase
 
         // clear
         fclose($stream);
-        $this->assertTrue($this->object->delete('/bingo'));
+        $this->assertTrue($this->object->del('/bingo'));
 
         // check again
         $this->assertEquals(null, $this->object->get('/bingo'));
@@ -215,7 +215,7 @@ class StorageTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals('wow', $this->object->get('/bingo'));
 
         // clear
-        $this->assertTrue($this->object->delete('/bingo'));
+        $this->assertTrue($this->object->del('/bingo'));
     }
 
     /**
@@ -236,8 +236,8 @@ class StorageTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals('wow', $this->object->get('/bingo2'));
 
         // clear
-        $this->assertTrue($this->object->delete('/bingo'));
-        $this->assertTrue($this->object->delete('/bingo2'));
+        $this->assertTrue($this->object->del('/bingo'));
+        $this->assertTrue($this->object->del('/bingo2'));
 
         $this->assertEquals(null, $this->object->get('/bingo'));
         $this->assertEquals(null, $this->object->get('/bingo2'));
@@ -263,7 +263,7 @@ class StorageTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals(20, $meta['mtime']);
 
         // clear
-        $this->assertTrue($this->object->delete('/bingo'));
+        $this->assertTrue($this->object->del('/bingo'));
         $this->assertEquals(null, $this->object->get('/bingo'));
     }
 
@@ -280,7 +280,7 @@ class StorageTest extends \PHPUnit_Framework_TestCase
         // overwrite existing dir, failed
         $this->assertFalse($this->object->put('/b1', 'xxx'));
 
-        $this->assertTrue($this->object->delete('/b1'));
+        $this->assertTrue($this->object->del('/b1'));
     }
 
     /**
@@ -295,7 +295,7 @@ class StorageTest extends \PHPUnit_Framework_TestCase
 
         $this->assertEquals('wow', $this->object->get('/b1'));
 
-        $this->assertTrue($this->object->delete('/b1'));
+        $this->assertTrue($this->object->del('/b1'));
     }
 
     /**
@@ -318,9 +318,9 @@ class StorageTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals('wow2', $this->object->get('/bb/bingo2'));
 
         // clear
-        $this->assertTrue($this->object->delete('/bingo'));
-        $this->assertTrue($this->object->delete('/bingo2'));
-        $this->assertTrue($this->object->delete('/bb'));
+        $this->assertTrue($this->object->del('/bingo'));
+        $this->assertTrue($this->object->del('/bingo2'));
+        $this->assertTrue($this->object->del('/bb'));
     }
 
     /**
@@ -340,8 +340,8 @@ class StorageTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals(['/b1/b2', '/b1/bingo'], $this->object->get('/b1'));
 
         // clear
-        $this->assertTrue($this->object->delete('/bingo'));
-        $this->assertTrue($this->object->delete('/b1'));
+        $this->assertTrue($this->object->del('/bingo'));
+        $this->assertTrue($this->object->del('/b1'));
     }
 
     /**
@@ -362,8 +362,8 @@ class StorageTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals('wow2', $this->object->get('/b3/b2/bingo2'));
 
         // clear
-        $this->assertTrue($this->object->delete('/b1'));
-        $this->assertTrue($this->object->delete('/b3'));
+        $this->assertTrue($this->object->del('/b1'));
+        $this->assertTrue($this->object->del('/b3'));
     }
 
     /**
@@ -382,8 +382,8 @@ class StorageTest extends \PHPUnit_Framework_TestCase
         $this->assertFalse($this->object->copy('/b1', '/b3'));
 
         // clear
-        $this->assertTrue($this->object->delete('/b1'));
-        $this->assertTrue($this->object->delete('/b3'));
+        $this->assertTrue($this->object->del('/b1'));
+        $this->assertTrue($this->object->del('/b3'));
     }
 
     /**
@@ -406,8 +406,8 @@ class StorageTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals('wow', $this->object->get('/disk/bingo'));
 
         // clear
-        $this->assertTrue($this->object->delete('/bingo'));
-        $this->assertTrue($this->object->delete('/disk/bingo'));
+        $this->assertTrue($this->object->del('/bingo'));
+        $this->assertTrue($this->object->del('/disk/bingo'));
 
         rmdir($dir);
     }
@@ -434,8 +434,8 @@ class StorageTest extends \PHPUnit_Framework_TestCase
         $this->assertTrue($this->object->has('/disk/bingo/b1'));
 
         // clear
-        $this->assertTrue($this->object->delete('/bingo'));
-        $this->assertTrue($this->object->delete('/disk/bingo'));
+        $this->assertTrue($this->object->del('/bingo'));
+        $this->assertTrue($this->object->del('/disk/bingo'));
 
         rmdir($dir);
     }
@@ -462,8 +462,8 @@ class StorageTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals('wow2', $this->object->get('/disk/b3/b2/bingo2'));
 
         // clear
-        $this->assertTrue($this->object->delete('/b1'));
-        $this->assertTrue($this->object->delete('/disk/b3'));
+        $this->assertTrue($this->object->del('/b1'));
+        $this->assertTrue($this->object->del('/disk/b3'));
 
         rmdir($dir);
     }
@@ -490,8 +490,8 @@ class StorageTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals('wow1', $this->object->get('/disk/b3/bingo1'));
 
         // clear
-        $this->assertTrue($this->object->delete('/b1'));
-        $this->assertTrue($this->object->delete('/disk/b3'));
+        $this->assertTrue($this->object->del('/b1'));
+        $this->assertTrue($this->object->del('/disk/b3'));
 
         rmdir($dir);
     }
@@ -518,7 +518,7 @@ class StorageTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals('wow2', $this->object->get('/bb/bingo2'));
 
         // clear
-        $this->assertTrue($this->object->delete('/bb'));
+        $this->assertTrue($this->object->del('/bb'));
     }
 
     /**
@@ -543,7 +543,7 @@ class StorageTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals('wow2', $this->object->get('/bb/bingo2'));
 
         // clear
-        $this->assertTrue($this->object->delete('/bb'));
+        $this->assertTrue($this->object->del('/bb'));
     }
 
     /**
@@ -568,7 +568,7 @@ class StorageTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals('wow2', $this->object->get('/b3/b2/bingo2'));
 
         // clear
-        $this->assertTrue($this->object->delete('/b3'));
+        $this->assertTrue($this->object->del('/b3'));
     }
 
     /**
@@ -598,8 +598,8 @@ class StorageTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals('wow', $this->object->get('/b1/b2/bingo'));
 
         // clear
-        $this->assertTrue($this->object->delete('/disk/bingo'));
-        $this->assertTrue($this->object->delete('/b1'));
+        $this->assertTrue($this->object->del('/disk/bingo'));
+        $this->assertTrue($this->object->del('/b1'));
 
         rmdir($dir);
     }
@@ -626,7 +626,7 @@ class StorageTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals('wow2', $this->object->get('/disk/b3/b2/bingo2'));
 
         // clear
-        $this->assertTrue($this->object->delete('/disk/b3'));
+        $this->assertTrue($this->object->del('/disk/b3'));
 
         rmdir($dir);
     }
@@ -651,7 +651,7 @@ class StorageTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals('wow1', $this->object->get('/disk/b3/b1'));
 
         // clear
-        $this->assertTrue($this->object->delete('/disk/b3'));
+        $this->assertTrue($this->object->del('/disk/b3'));
 
         rmdir($dir);
     }
@@ -678,7 +678,7 @@ class StorageTest extends \PHPUnit_Framework_TestCase
         $this->assertFalse($this->object->move('/b2', '/b2/new'));
 
         // clear
-        $this->assertTrue($this->object->delete('/'));
+        $this->assertTrue($this->object->del('/'));
     }
 
     /**
@@ -707,7 +707,7 @@ class StorageTest extends \PHPUnit_Framework_TestCase
         $this->assertFalse($this->object->move('/bingo', '/disk'));
 
         // clear
-        $this->assertTrue($this->object->delete('/'));
+        $this->assertTrue($this->object->del('/'));
 
         rmdir($dir);
     }

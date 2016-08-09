@@ -21,8 +21,8 @@ use Phossa2\Storage\Traits\PathAwareTrait;
 use Phossa2\Shared\Error\ErrorAwareInterface;
 use Phossa2\Storage\Interfaces\StorageInterface;
 use Phossa2\Shared\Extension\ExtensionAwareTrait;
-use Phossa2\Shared\Extension\ExtensionAwareInterface;
 use Phossa2\Storage\Interfaces\FilesystemInterface;
+use Phossa2\Shared\Extension\ExtensionAwareInterface;
 
 /**
  * Storage
@@ -41,6 +41,8 @@ class Storage extends ObjectAbstract implements StorageInterface, ErrorAwareInte
     use PathAwareTrait, ErrorAwareTrait, ExtensionAwareTrait;
 
     /**
+     * At least have one filesystem mounted
+     *
      * @param  string $mountPoint
      * @param  FilesystemInterface $filesystem
      * @access public
@@ -114,6 +116,17 @@ class Storage extends ObjectAbstract implements StorageInterface, ErrorAwareInte
     /**
      * {@inheritDoc}
      */
+    public function del(/*# string */ $path)/*# : bool */
+    {
+        $obj = $this->path($path);
+        $res = $obj->delete();
+        $this->copyError($obj);
+        return $res;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
     public function meta(/*# string */ $path)/*# : array */
     {
         $obj = $this->path($path);
@@ -146,28 +159,9 @@ class Storage extends ObjectAbstract implements StorageInterface, ErrorAwareInte
         if ($this->isSameFilesystem($from, $to)) {
             return $this->sameFilesystemAction($from, $to, 'rename');
         } elseif ($this->copy($from, $to)) {
-            return $this->delete($from);
+            return $this->del($from);
         }
         return false;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public function delete(/*# string */ $path)/*# : bool */
-    {
-        $obj = $this->path($path);
-        $res = $obj->delete();
-        $this->copyError($obj);
-        return $res;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public function isDir(/*# string */ $path)/*# : bool */
-    {
-        return $this->path($path)->isDir();
     }
 
     /**
@@ -202,10 +196,12 @@ class Storage extends ObjectAbstract implements StorageInterface, ErrorAwareInte
         /*# string */ $from,
         /*# string */ $to
     )/*# : bool */ {
-        if ($this->isDir($to)) {
+        // if $to is dir, copy INTO $to
+        if ($this->path($to)->isDir()) {
             $to = $this->mergePath($to, basename($from));
         }
 
+        // read contents of $content
         $content = $this->get($from);
 
         if (is_null($content)) {
@@ -244,8 +240,8 @@ class Storage extends ObjectAbstract implements StorageInterface, ErrorAwareInte
     protected function copyDir(array $paths, /*# string */ $destination)
     {
         // if $destination is a file, reomve first
-        if (!$this->isDir($destination)) {
-            $this->delete($destination);
+        if (!$this->path($destination)->isDir()) {
+            $this->del($destination);
         }
 
         foreach ($paths as $path) {

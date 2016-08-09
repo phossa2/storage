@@ -24,7 +24,7 @@ use Phossa2\Storage\Interfaces\PermissionAwareInterface;
 /**
  * Filesystem
  *
- * Implementation of FilesystemInterface
+ * Implementation of FilesystemInterface. A wrapper of driver with permissions
  *
  * @package Phossa2\Storage
  * @author  Hong Zhang <phossa@126.com>

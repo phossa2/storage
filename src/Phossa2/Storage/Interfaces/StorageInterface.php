@@ -68,16 +68,16 @@ interface StorageInterface extends MountableInterface, PathAwareInterface
     )/*# : bool */;
 
     /**
-     * Get meta data of the path。
+     * Delete the specified path
      *
-     * Returns empty [] if not found
+     * - If path is a dir, recursively remove all
      *
      * @param  string $path
-     * @return array
+     * @return bool operation status
      * @access public
      * @api
      */
-    public function meta(/*# string */ $path)/*# : array */;
+    public function del(/*# string */ $path)/*# : bool */;
 
     /**
      * Copy to a new path
@@ -108,24 +108,14 @@ interface StorageInterface extends MountableInterface, PathAwareInterface
     )/*# : bool */;
 
     /**
-     * Delete the specified path
+     * Get meta data of the path。
      *
-     * - If path is a dir, recursively remove all
+     * Returns empty [] if not found
      *
      * @param  string $path
-     * @return bool operation status
+     * @return array
      * @access public
      * @api
      */
-    public function delete(/*# string */ $path)/*# : bool */;
-
-    /**
-     * Is path a directory
-     *
-     * @param  string $path
-     * @return bool
-     * @access public
-     * @api
-     */
-    public function isDir(/*# string */ $path)/*# : bool */;
+    public function meta(/*# string */ $path)/*# : array */;
 }
