@@ -243,6 +243,11 @@ class Storage extends ObjectAbstract implements StorageInterface, ErrorAwareInte
      */
     protected function copyDir(array $paths, /*# string */ $destination)
     {
+        // if $destination is a file, reomve first
+        if (!$this->isDir($destination)) {
+            $this->delete($destination);
+        }
+
         foreach ($paths as $path) {
             $dest = $this->mergePath($destination, basename($path));
             if (!$this->copy($path, $dest)) {

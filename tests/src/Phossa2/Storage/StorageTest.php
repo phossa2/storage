@@ -469,7 +469,7 @@ class StorageTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * Test different filesystem dir copy ove file failure
+     * Test different filesystem dir copy over file is OK
      *
      * @cover Phossa2\Storage\Storage::copy()
      */
@@ -484,10 +484,10 @@ class StorageTest extends \PHPUnit_Framework_TestCase
         $this->assertTrue($this->object->put('/b1/b2/bingo2', 'wow2'));
         $this->assertTrue($this->object->put('/disk/b3', 'wow3'));
 
-        // copy failure
-        $this->assertFalse($this->object->copy('/b1', '/disk/b3'));
+        // copy ok
+        $this->assertTrue($this->object->copy('/b1', '/disk/b3'));
 
-        $this->assertEquals('wow3', $this->object->get('/disk/b3'));
+        $this->assertEquals('wow1', $this->object->get('/disk/b3/bingo1'));
 
         // clear
         $this->assertTrue($this->object->delete('/b1'));
@@ -626,33 +626,6 @@ class StorageTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals('wow2', $this->object->get('/disk/b3/b2/bingo2'));
 
         // clear
-        $this->assertTrue($this->object->delete('/disk/b3'));
-
-        rmdir($dir);
-    }
-
-    /**
-     * Test different filesystem dir move dir over file is failed
-     *
-     * @cover Phossa2\Storage\Storage::move()
-     */
-    public function testMove40()
-    {
-        // mount another filesystem
-        $dir = $this->dir . 'x8';
-        $this->object->mount('/disk', new Filesystem(new LocalDriver($dir)));
-
-        // put
-        $this->assertTrue($this->object->put('/b1/bingo1', 'wow1'));
-        $this->assertTrue($this->object->put('/b1/b2/bingo2', 'wow2'));
-        $this->assertTrue($this->object->put('/disk/b3', 'wow3'));
-
-        // move
-        $this->assertFalse($this->object->move('/b1', '/disk/b3'));
-        $this->assertEquals('wow3', $this->object->get('/disk/b3'));
-
-        // clear
-        $this->assertTrue($this->object->delete('/b1'));
         $this->assertTrue($this->object->delete('/disk/b3'));
 
         rmdir($dir);
