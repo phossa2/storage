@@ -147,14 +147,21 @@ abstract class DriverAbstract extends ObjectAbstract implements DriverInterface,
      */
     public function rename(/*# string */ $from, /*# string */ $to)/*# : bool */
     {
-        $real_from = $this->realPath($from);
         $real_to = $this->realPath($to);
-
         if ($this->ensurePath($real_to)) {
-            if ($this->isRealDir($real_from)) {
-                $res = $this->renameDir($real_from, $real_to);
-            } else {
+            $real_from = $this->realPath($from);
+
+            // rename a file
+            if (!$this->isRealDir($real_from)) {
                 $res = $this->renameFile($real_from, $real_to);
+
+            // rename a dir into file is NOT allowed
+            } elseif ($this->realExists($real_to)){
+                $res = false;
+
+            // rename a dir
+            } else {
+                $res = $this->renameDir($real_from, $real_to);
             }
 
             return $res ?: $this->setError(

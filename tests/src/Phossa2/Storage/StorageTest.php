@@ -556,7 +556,7 @@ class StorageTest extends \PHPUnit_Framework_TestCase
         $this->assertTrue($this->object->put('/b1/bingo1', 'wow1'));
         $this->assertTrue($this->object->put('/b1/b2/bingo2', 'wow2'));
 
-        // move
+        // move, directory overwrite file is ok
         $this->assertTrue($this->object->move('/b1', '/b3'));
 
         $this->assertFalse($this->object->has('/b1/bingo1'));
@@ -570,7 +570,7 @@ class StorageTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * Test same filesystem move dir over file
+     * Test same filesystem dir move dir over file failure
      *
      * @cover Phossa2\Storage\Storage::move()
      */
@@ -581,13 +581,16 @@ class StorageTest extends \PHPUnit_Framework_TestCase
         $this->assertTrue($this->object->put('/b1/b2/bingo2', 'wow2'));
         $this->assertTrue($this->object->put('/b3', 'wow3'));
 
-        // directory overwrite file
-        $this->assertTrue($this->object->move('/b1', '/b3'));
+        // move, directory overwrite file is NOT ok
+        $this->assertFalse($this->object->move('/b1', '/b3'));
 
-        $this->assertFalse($this->object->has('/b1/b2/bingo2'));
-        $this->assertTrue($this->object->has('/b3/b2/bingo2'));
+        $this->assertTrue($this->object->has('/b1/bingo1'));
+        $this->assertTrue($this->object->has('/b1/b2/bingo2'));
+
+        $this->assertEquals('wow3', $this->object->get('/b3'));
 
         // clear
+        $this->assertTrue($this->object->delete('/b1'));
         $this->assertTrue($this->object->delete('/b3'));
     }
 
@@ -603,17 +606,23 @@ class StorageTest extends \PHPUnit_Framework_TestCase
         $this->object->mount('/disk', new Filesystem(new LocalDriver($dir)));
 
         // put
-        $this->object->put('/bingo', 'wow');
+        $this->assertTrue($this->object->put('/bingo', 'wow'));
+        $this->assertTrue($this->object->put('/b1/b2/bingo', 'xxx'));
 
-        // copy
-        $this->object->move('/bingo', '/disk/bingo');
+        // move
+        $this->assertTrue($this->object->move('/bingo', '/disk/bingo'));
 
         $this->assertFalse($this->object->has('/bingo'));
 
         $this->assertEquals('wow', $this->object->get('/disk/bingo'));
 
+        // move into a dir
+        $this->assertTrue($this->object->move('/disk/bingo', '/b1/b2'));
+        $this->assertEquals('wow', $this->object->get('/b1/b2/bingo'));
+
         // clear
-        $this->object->delete('/disk/bingo');
+        $this->assertTrue($this->object->delete('/disk/bingo'));
+        $this->assertTrue($this->object->delete('/b1'));
 
         rmdir($dir);
     }
@@ -626,21 +635,48 @@ class StorageTest extends \PHPUnit_Framework_TestCase
     public function testMove4()
     {
         // mount another filesystem
-        $dir = $this->dir . 'x6';
+        $dir = $this->dir . 'x7';
         $this->object->mount('/disk', new Filesystem(new LocalDriver($dir)));
 
         // put
-        $this->object->put('/b1/bingo1', 'wow1');
-        $this->object->put('/b1/b2/bingo2', 'wow2');
+        $this->assertTrue($this->object->put('/b1/bingo1', 'wow1'));
+        $this->assertTrue($this->object->put('/b1/b2/bingo2', 'wow2'));
 
-        // copy
-        $this->object->move('/b1', '/disk/b3');
+        // move
+        $this->assertTrue($this->object->move('/b1', '/disk/b3'));
 
         $this->assertEquals('wow1', $this->object->get('/disk/b3/bingo1'));
         $this->assertEquals('wow2', $this->object->get('/disk/b3/b2/bingo2'));
 
         // clear
-        $this->object->delete('/disk/b3');
+        $this->assertTrue($this->object->delete('/disk/b3'));
+
+        rmdir($dir);
+    }
+
+    /**
+     * Test different filesystem dir move dir over file is failed
+     *
+     * @cover Phossa2\Storage\Storage::move()
+     */
+    public function testMove40()
+    {
+        // mount another filesystem
+        $dir = $this->dir . 'x8';
+        $this->object->mount('/disk', new Filesystem(new LocalDriver($dir)));
+
+        // put
+        $this->assertTrue($this->object->put('/b1/bingo1', 'wow1'));
+        $this->assertTrue($this->object->put('/b1/b2/bingo2', 'wow2'));
+        $this->assertTrue($this->object->put('/disk/b3', 'wow3'));
+
+        // move
+        $this->assertFalse($this->object->move('/b1', '/disk/b3'));
+        $this->assertEquals('wow3', $this->object->get('/disk/b3'));
+
+        // clear
+        $this->assertTrue($this->object->delete('/b1'));
+        $this->assertTrue($this->object->delete('/disk/b3'));
 
         rmdir($dir);
     }
