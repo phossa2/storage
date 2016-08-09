@@ -249,7 +249,7 @@ class Path extends ObjectAbstract implements PathInterface, ErrorAwareInterface,
 
         // destination is direcotry
         if ($this->getDriver()->isDir($destination)) {
-            $destination .= '/' . basename($this->path);
+            $destination = rtrim($destination, '/') . '/' . basename($this->path);
         }
 
         $res = $this->getDriver()->{$action}($this->path, $destination);

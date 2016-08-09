@@ -129,25 +129,10 @@ class Storage extends ObjectAbstract implements StorageInterface, ErrorAwareInte
         /*# string */ $from,
         /*# string */ $to
     )/*# : bool */ {
-        // same filesystem copy
         if ($this->isSameFilesystem($from, $to)) {
             return $this->sameFilesystemAction($from, $to, 'copy');
-        }
-
-        if ($this->isDir($to)) {
-            $to = $this->mergePath($to, basename($from));
-        }
-
-        $content = $this->get($from);
-
-        if (is_null($content)) {
-            return false;
-
-        } elseif (is_array($content)) {
-            return $this->copyDir($content, $to);
-
         } else {
-            return $this->put($to, $content);
+            return $this->diffFilesystemCopy($from, $to);
         }
     }
 
@@ -158,13 +143,9 @@ class Storage extends ObjectAbstract implements StorageInterface, ErrorAwareInte
         /*# string */ $from,
         /*# string */ $to
     )/*# : bool */ {
-        // same filesystem move
         if ($this->isSameFilesystem($from, $to)) {
             return $this->sameFilesystemAction($from, $to, 'rename');
-        }
-
-        // diff filesystem move
-        if ($this->copy($from, $to)) {
+        } elseif ($this->copy($from, $to)) {
             return $this->delete($from);
         }
         return false;
@@ -207,6 +188,35 @@ class Storage extends ObjectAbstract implements StorageInterface, ErrorAwareInte
         $res = $obj->{$action}($this->path($to)->getPath());
         $this->copyError($obj);
         return $res;
+    }
+
+    /**
+     * Copy between different filesystem
+     *
+     * @param  string $from
+     * @param  string $to
+     * @return bool
+     * @access protected
+     */
+    protected function diffFilesystemCopy(
+        /*# string */ $from,
+        /*# string */ $to
+    )/*# : bool */ {
+        if ($this->isDir($to)) {
+            $to = $this->mergePath($to, basename($from));
+        }
+
+        $content = $this->get($from);
+
+        if (is_null($content)) {
+            return false;
+
+        } elseif (is_array($content)) {
+            return $this->copyDir($content, $to);
+
+        } else {
+            return $this->put($to, $content);
+        }
     }
 
     /**

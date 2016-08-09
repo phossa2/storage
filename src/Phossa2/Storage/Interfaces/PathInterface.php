@@ -27,7 +27,6 @@ interface PathInterface
     /**
      * Does this path exist ?
      *
-     * @param  bool $forceCheck force checking instead of using cache
      * @return bool
      * @access public
      * @api

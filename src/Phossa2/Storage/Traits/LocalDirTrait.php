@@ -77,25 +77,23 @@ trait LocalDirTrait
         /*# string */ $from,
         /*# string */ $to
     )/*# : bool */ {
-        if (!$this->makeDirectory($to)) {
-            return false;
-        }
+        $res = $this->makeDirectory($to);
 
         $files = $this->readDir($from);
         foreach ($files as $file) {
+            if (false === $res) {
+                return false;
+            }
+
             $f = $from . \DIRECTORY_SEPARATOR . $file;
             $t = $to . \DIRECTORY_SEPARATOR . $file;
             if (is_dir($f)) {
-
                 $res = $this->copyDir($f, $t);
             } else {
                 $res = @copy($f, $t);
             }
-            if (false === $res) {
-                return false;
-            }
         }
-        return true;
+        return $res;
     }
 
     /**
@@ -123,21 +121,18 @@ trait LocalDirTrait
     }
 
     /**
-     * create directory
-     *
-     * @param  string $dir
-     * @access protected
+     * {@inheritDoc}
      */
-    protected function makeDirectory(/*# string */ $dir)/*# : bool */
+    protected function makeDirectory(/*# string */ $realPath)/*# : bool */
     {
-        if (!is_dir($dir)) {
+        if (!is_dir($realPath)) {
             $umask = umask(0);
-            @mkdir($dir, 0755, true);
+            @mkdir($realPath, 0755, true);
             umask($umask);
 
-            if (!is_dir($dir)) {
+            if (!is_dir($realPath)) {
                 $this->setError(
-                    Message::get(Message::STR_MKDIR_FAIL, $dir),
+                    Message::get(Message::STR_MKDIR_FAIL, $realPath),
                     Message::STR_MKDIR_FAIL
                 );
                 return false;

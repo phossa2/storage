@@ -245,6 +245,16 @@ abstract class DriverAbstract extends ObjectAbstract implements DriverInterface,
     )/*# : array */;
 
     /**
+     * create directory
+     *
+     * @param  string $realPath
+     * @access protected
+     */
+    abstract  protected function makeDirectory(
+        /*# string */ $realPath
+    )/*# : bool */;
+
+    /**
      * Open read stream
      *
      * @param  string $realPath
