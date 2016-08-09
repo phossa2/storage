@@ -89,7 +89,7 @@ trait LocalDirTrait
                 );
             }
         }
-        return $res;
+        return true;
     }
 
     /**
@@ -101,15 +101,36 @@ trait LocalDirTrait
     )/*# : bool */ {
         $pref = rtrim($realPath, '/\\') . \DIRECTORY_SEPARATOR;
         foreach ($this->readDir($realPath, $pref) as $file) {
-            $res = is_dir($file) ? $this->deleteDir($file) : unlink($file);
-            if (false === $res) {
+            if (! (is_dir($file) ? $this->deleteDir($file) : unlink($file))) {
                 return $this->setError(
                     Message::get(Message::STR_DELETE_FAIL, $file),
                     Message::STR_DELETE_FAIL
                 );
             }
         }
-        return $keep ? true : rmdir($realPath);
+        return $this->removeDir($realPath, $keep);
+    }
+
+    /**
+     * Remove the directory itself
+     *
+     * @param  string $realPath
+     * @param  bool $keep
+     * @return bool
+     * @access protected
+     */
+    protected function removeDir(
+        /*# string */ $realPath,
+        /*# bool */ $keep = false
+    )/*# : bool */ {
+        if ($keep || @rmdir($realPath)) {
+            return true;
+        } else {
+            return $this->setError(
+                Message::get(Message::STR_DELETE_FAIL, $realPath),
+                Message::STR_DELETE_FAIL
+            );
+        }
     }
 
     /**
