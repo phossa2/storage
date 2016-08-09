@@ -203,7 +203,7 @@ abstract class DriverAbstract extends ObjectAbstract implements DriverInterface,
         $real = $this->realPath($path);
 
         if ($this->isRealDir($real)) {
-            return $this->deleteDir($real);
+            return $this->deleteDir($real, $path === '');
         } else {
             if ($this->use_metafile) {
                 $this->deleteFile($real . '.meta');
@@ -392,10 +392,14 @@ abstract class DriverAbstract extends ObjectAbstract implements DriverInterface,
      * Delete directory
      *
      * @param  string $realPath
+     * @param  bool keep the upper most directory
      * @return bool
      * @access protected
      */
-    abstract protected function deleteDir(/*# string */ $realPath)/*# : bool */;
+    abstract protected function deleteDir(
+        /*# string */ $realPath,
+        /*# bool */ $keep = false
+    )/*# : bool */;
 
     /**
      * Delete the file

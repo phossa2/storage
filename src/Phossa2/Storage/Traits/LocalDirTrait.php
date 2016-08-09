@@ -99,8 +99,10 @@ trait LocalDirTrait
     /**
      * {@inheritDoc}
      */
-    protected function deleteDir(/*# string */ $realPath)/*# : bool */
-    {
+    protected function deleteDir(
+        /*# string */ $realPath,
+        /*# bool */ $keep = false
+    )/*# : bool */ {
         $pref  = rtrim($realPath, '/\\') . \DIRECTORY_SEPARATOR;
         $files = $this->readDir($realPath, $pref);
 
@@ -117,7 +119,8 @@ trait LocalDirTrait
                 );
             }
         }
-        return rmdir($realPath);
+
+        return $keep ? true : rmdir($realPath);
     }
 
     /**

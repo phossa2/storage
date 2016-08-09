@@ -3,6 +3,7 @@
 namespace Phossa2\Storage;
 
 use Phossa2\Storage\Driver\LocalDriver;
+use Phossa2\Storage\Interfaces\PermissionAwareInterface;
 
 /**
  * Storage test case.
@@ -677,6 +678,87 @@ class StorageTest extends \PHPUnit_Framework_TestCase
         // clear
         $this->assertTrue($this->object->delete('/b1'));
         $this->assertTrue($this->object->delete('/disk/b3'));
+
+        rmdir($dir);
+    }
+
+    /**
+     * Test move '/', will keep '/' undeleted
+     *
+     * @cover Phossa2\Storage\Storage::move()
+     */
+    public function testMove5()
+    {
+        // mount another filesystem
+        $dir = $this->dir . 'x9';
+        $this->object->mount('/disk', new Filesystem(new LocalDriver($dir)));
+
+        // put in '/'
+        $this->assertTrue($this->object->put('/b1', 'wow1'));
+        $this->assertTrue($this->object->put('/b2/bingo2', 'wow2'));
+
+        // move
+        $this->assertTrue($this->object->move('/', '/disk/b3'));
+        $this->assertEquals('wow1', $this->object->get('/disk/b3/b1'));
+
+        // clear
+        $this->assertTrue($this->object->delete('/disk/b3'));
+
+        rmdir($dir);
+    }
+
+    /**
+     * Test move loop, like move '/' to '/subdir' is a failure
+     *
+     * @cover Phossa2\Storage\Storage::move()
+     */
+    public function testMove6()
+    {
+        // put in '/'
+        $this->assertTrue($this->object->put('/b1', 'wow1'));
+        $this->assertTrue($this->object->put('/b2/bingo2', 'wow2'));
+
+        // recursive move failed
+        $this->assertFalse($this->object->move('/', '/b3'));
+        $this->assertTrue($this->object->has('/b1'));
+        $this->assertTrue($this->object->has('/b2/bingo2'));
+
+        $this->assertFalse($this->object->has('/b3'));
+
+        // try sub
+        $this->assertFalse($this->object->move('/b2', '/b2/new'));
+
+        // clear
+        $this->assertTrue($this->object->delete('/'));
+    }
+
+    /**
+     * Test permission
+     *
+     * @cover Phossa2\Storage\Storage::move()
+     */
+    public function testMove7()
+    {
+        // mount another filesystem READONLY
+        $dir = $this->dir . 'x8';
+        $this->object->mount('/disk', new Filesystem(
+            new LocalDriver($dir), PermissionAwareInterface::PERM_READ
+        ));
+
+        // put
+        $this->assertTrue($this->object->put('/bingo', 'wow1'));
+
+        // write fail
+        $this->assertFalse($this->object->put('/disk/b3', 'wow3'));
+
+        // copy fail
+        $this->assertFalse($this->object->copy('/bingo', '/disk'));
+
+        // move fail
+        $this->assertFalse($this->object->move('/bingo', '/disk'));
+
+        // clear
+        $this->assertTrue($this->object->delete('/'));
 
         rmdir($dir);
     }
