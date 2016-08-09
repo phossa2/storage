@@ -19,7 +19,8 @@ class StorageTest extends \PHPUnit_Framework_TestCase
     {
         parent::setUp();
 
-        $this->dir = sys_get_temp_dir() . \DIRECTORY_SEPARATOR . time();
+        $this->dir = sys_get_temp_dir() . \DIRECTORY_SEPARATOR .
+            microtime(true) . rand(0, 100);
 
         $this->object = new Storage(
             '/',
@@ -69,9 +70,11 @@ class StorageTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * Test has
+     * Test has()
      *
      * @cover Phossa2\Storage\Storage::has()
+     * @cover Phossa2\Storage\Storage::put()
+     * @cover Phossa2\Storage\Storage::delete()
      */
     public function testHas()
     {
@@ -79,11 +82,14 @@ class StorageTest extends \PHPUnit_Framework_TestCase
         $this->assertFalse($this->object->has('/bingo'));
 
         // found
-        $this->object->put('/bingo', 'wow');
+        $this->assertTrue($this->object->put('/bingo', 'wow'));
         $this->assertTrue($this->object->has('/bingo'));
 
         // clear
-        $this->object->delete('/bingo');
+        $this->assertTrue($this->object->delete('/bingo'));
+
+        // not found
+        $this->assertFalse($this->object->has('/bingo'));
     }
 
     /**
@@ -97,13 +103,16 @@ class StorageTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals(null, $this->object->get('/bingo'));
 
         $this->expectOutputString('Path "/bingo" not found');
+
         echo $this->object->getError();
     }
 
     /**
-     * Test get not found, normal file
+     * Test get normal file
      *
      * @cover Phossa2\Storage\Storage::get()
+     * @cover Phossa2\Storage\Storage::put()
+     * @cover Phossa2\Storage\Storage::delete()
      */
     public function testGet1()
     {
@@ -111,17 +120,22 @@ class StorageTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals(null, $this->object->get('/bingo'));
 
         // found
-        $this->object->put('/bingo', 'wow');
+        $this->assertTrue($this->object->put('/bingo', 'wow'));
         $this->assertEquals('wow', $this->object->get('/bingo'));
 
         // clear
-        $this->object->delete('/bingo');
+        $this->assertTrue($this->object->delete('/bingo'));
+
+        // deleted
+        $this->assertEquals(null, $this->object->get('/bingo'));
     }
 
     /**
      * Test get dir
      *
      * @cover Phossa2\Storage\Storage::get()
+     * @cover Phossa2\Storage\Storage::put()
+     * @cover Phossa2\Storage\Storage::delete()
      */
     public function testGet2()
     {
@@ -129,23 +143,42 @@ class StorageTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals(null, $this->object->get('/b1'));
 
         // dir
-        $this->object->put('/b1/b2', 'wow');
-        $this->object->put('/b1/b3', 'wow');
-        $this->object->put('/b1/b4/b5', 'wow');
+        $this->assertTrue($this->object->put('/b1/b2', 'wow'));
+        $this->assertTrue($this->object->put('/b1/b3', 'wow'));
+        $this->assertTrue($this->object->put('/b1/b4/b5', 'wow'));
 
         $this->assertEquals(
             ['/b1/b2', '/b1/b3', '/b1/b4'],
             $this->object->get('/b1')
         );
 
+        // check file in sub dir
+        $this->assertEquals('wow', $this->object->get('/b1/b4/b5'));
+
+        // delete one sub dir
+        $this->assertTrue($this->object->delete('/b1/b4'));
+        $this->assertEquals(null, $this->object->get('/b1/b4/b5'));
+
+        $this->assertEquals('wow', $this->object->get('/b1/b3'));
+
+        $this->assertEquals(
+            ['/b1/b2', '/b1/b3'],
+            $this->object->get('/b1')
+        );
+
         // clear
-        $this->object->delete('/b1');
+        $this->assertTrue($this->object->delete('/b1'));
+
+        // deleted
+        $this->assertEquals(null, $this->object->get('/b1'));
     }
 
     /**
      * Test get stream
      *
      * @cover Phossa2\Storage\Storage::get()
+     * @cover Phossa2\Storage\Storage::put()
+     * @cover Phossa2\Storage\Storage::delete()
      */
     public function testGet3()
     {
@@ -153,7 +186,7 @@ class StorageTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals(null, $this->object->get('/bingo'));
 
         // put
-        $this->object->put('/bingo', 'wow');
+        $this->assertTrue($this->object->put('/bingo', 'wow'));
 
         // get stream
         $stream = $this->object->get('/bingo', true);
@@ -161,7 +194,10 @@ class StorageTest extends \PHPUnit_Framework_TestCase
 
         // clear
         fclose($stream);
-        $this->object->delete('/bingo');
+        $this->assertTrue($this->object->delete('/bingo'));
+
+        // check again
+        $this->assertEquals(null, $this->object->get('/bingo'));
     }
 
     /**
@@ -172,13 +208,13 @@ class StorageTest extends \PHPUnit_Framework_TestCase
     public function testPut0()
     {
         // put
-        $this->object->put('/bingo', 'wow');
+        $this->assertTrue($this->object->put('/bingo', 'wow'));
 
         // test
         $this->assertEquals('wow', $this->object->get('/bingo'));
 
         // clear
-        $this->object->delete('/bingo');
+        $this->assertTrue($this->object->delete('/bingo'));
     }
 
     /**
@@ -189,18 +225,21 @@ class StorageTest extends \PHPUnit_Framework_TestCase
     public function testPut1()
     {
         // put
-        $this->object->put('/bingo', 'wow');
+        $this->assertTrue($this->object->put('/bingo', 'wow'));
 
         // get/put stream
         $stream = $this->object->get('/bingo', true);
-        $this->object->put('/bingo2', $stream);
+        $this->assertTrue($this->object->put('/bingo2', $stream));
         fclose($stream);
 
         $this->assertEquals('wow', $this->object->get('/bingo2'));
 
         // clear
-        $this->object->delete('/bingo');
-        $this->object->delete('/bingo2');
+        $this->assertTrue($this->object->delete('/bingo'));
+        $this->assertTrue($this->object->delete('/bingo2'));
+
+        $this->assertEquals(null, $this->object->get('/bingo'));
+        $this->assertEquals(null, $this->object->get('/bingo2'));
     }
 
     /**
@@ -211,19 +250,51 @@ class StorageTest extends \PHPUnit_Framework_TestCase
     public function testPut2()
     {
         // put
-        $this->object->put('/bingo', 'wow', ['mtime' => 10]);
+        $this->assertTrue($this->object->put('/bingo', 'wow', ['mtime' => 10]));
 
         $meta = $this->object->meta('/bingo');
         $this->assertEquals(10, $meta['mtime']);
 
         // change meta
-        $this->object->put('/bingo', null, ['mtime' => 20]);
+        $this->assertTrue($this->object->put('/bingo', null, ['mtime' => 20]));
 
         $meta = $this->object->meta('/bingo');
         $this->assertEquals(20, $meta['mtime']);
 
         // clear
-        $this->object->delete('/bingo');
+        $this->assertTrue($this->object->delete('/bingo'));
+        $this->assertEquals(null, $this->object->get('/bingo'));
+    }
+
+    /**
+     * Test overwrite existing directory
+     *
+     * @cover Phossa2\Storage\Storage::put()
+     */
+    public function testPut3()
+    {
+        // put
+        $this->assertTrue($this->object->put('/b1/b2', 'wow'));
+
+        // overwrite existing dir, failed
+        $this->assertFalse($this->object->put('/b1', 'xxx'));
+
+        $this->assertTrue($this->object->delete('/b1'));
+    }
+
+    /**
+     * Test overwrite existing file
+     *
+     * @cover Phossa2\Storage\Storage::put()
+     */
+    public function testPut4()
+    {
+        $this->assertTrue($this->object->put('/b1', 'wow'));
+        $this->assertFalse($this->object->put('/b1/b2', 'wow'));
+
+        $this->assertEquals('wow', $this->object->get('/b1'));
+
+        $this->assertTrue($this->object->delete('/b1'));
     }
 
     /**
@@ -234,21 +305,42 @@ class StorageTest extends \PHPUnit_Framework_TestCase
     public function testCopy1()
     {
         // put
-        $this->object->put('/bingo', 'wow');
-        $this->object->put('/bingo2', 'wow2');
+        $this->assertTrue($this->object->put('/bingo', 'wow'));
+        $this->assertTrue($this->object->put('/bingo2', 'wow2'));
 
         // copy 1
-        $this->object->copy('/bingo', '/bb/bingo2');
+        $this->assertTrue($this->object->copy('/bingo', '/bb/bingo2'));
         $this->assertEquals('wow', $this->object->get('/bb/bingo2'));
 
         // overwrite copy
-        $this->object->copy('/bingo2', '/bb/bingo2');
+        $this->assertTrue($this->object->copy('/bingo2', '/bb/bingo2'));
         $this->assertEquals('wow2', $this->object->get('/bb/bingo2'));
 
         // clear
-        $this->object->delete('/bingo');
-        $this->object->delete('/bingo2');
-        $this->object->delete('/bb');
+        $this->assertTrue($this->object->delete('/bingo'));
+        $this->assertTrue($this->object->delete('/bingo2'));
+        $this->assertTrue($this->object->delete('/bb'));
+    }
+
+    /**
+     * Test same filesystem file copy into dir
+     *
+     * @cover Phossa2\Storage\Storage::copy()
+     */
+    public function testCopy10()
+    {
+        // put
+        $this->assertTrue($this->object->put('/b1/b2', 'wow'));
+        $this->assertTrue($this->object->put('/bingo', 'wow2'));
+
+        // copy file into dir
+        $this->assertTrue($this->object->copy('/bingo', '/b1'));
+
+        $this->assertEquals(['/b1/b2', '/b1/bingo'], $this->object->get('/b1'));
+
+        // clear
+        $this->assertTrue($this->object->delete('/bingo'));
+        $this->assertTrue($this->object->delete('/b1'));
     }
 
     /**
@@ -259,18 +351,38 @@ class StorageTest extends \PHPUnit_Framework_TestCase
     public function testCopy2()
     {
         // put
-        $this->object->put('/b1/bingo1', 'wow1');
-        $this->object->put('/b1/b2/bingo2', 'wow2');
+        $this->assertTrue($this->object->put('/b1/bingo1', 'wow1'));
+        $this->assertTrue($this->object->put('/b1/b2/bingo2', 'wow2'));
 
         // copy
-        $this->object->copy('/b1', '/b3');
+        $this->assertTrue($this->object->copy('/b1', '/b3'));
 
         $this->assertEquals('wow1', $this->object->get('/b3/bingo1'));
         $this->assertEquals('wow2', $this->object->get('/b3/b2/bingo2'));
 
         // clear
-        $this->object->delete('/b1');
-        $this->object->delete('/b3');
+        $this->assertTrue($this->object->delete('/b1'));
+        $this->assertTrue($this->object->delete('/b3'));
+    }
+
+    /**
+     * Test same filesystem dir copy failure
+     *
+     * @cover Phossa2\Storage\Storage::copy()
+     */
+    public function testCopy20()
+    {
+        // put
+        $this->assertTrue($this->object->put('/b1/bingo1', 'wow1'));
+        $this->assertTrue($this->object->put('/b1/b2/bingo2', 'wow2'));
+        $this->assertTrue($this->object->put('/b3', 'wow3'));
+
+        // copy dir overto a existing file, failed
+        $this->assertFalse($this->object->copy('/b1', '/b3'));
+
+        // clear
+        $this->assertTrue($this->object->delete('/b1'));
+        $this->assertTrue($this->object->delete('/b3'));
     }
 
     /**
@@ -281,20 +393,48 @@ class StorageTest extends \PHPUnit_Framework_TestCase
     public function testCopy3()
     {
         // mount another filesystem
-        $dir = sys_get_temp_dir() . \DIRECTORY_SEPARATOR . (time() . 'x');
+        $dir = $this->dir . 'x1';
         $this->object->mount('/disk', new Filesystem(new LocalDriver($dir)));
 
         // put
-        $this->object->put('/bingo', 'wow');
+        $this->assertTrue($this->object->put('/bingo', 'wow'));
 
         // copy
-        $this->object->copy('/bingo', '/disk/bingo');
+        $this->assertTrue($this->object->copy('/bingo', '/disk/bingo'));
 
         $this->assertEquals('wow', $this->object->get('/disk/bingo'));
 
         // clear
-        $this->object->delete('/bingo');
-        $this->object->delete('/disk/bingo');
+        $this->assertTrue($this->object->delete('/bingo'));
+        $this->assertTrue($this->object->delete('/disk/bingo'));
+
+        rmdir($dir);
+    }
+
+    /**
+     * Test different filesystem file copy into dir
+     *
+     * @cover Phossa2\Storage\Storage::copy()
+     */
+    public function testCopy30()
+    {
+        // mount another filesystem
+        $dir = $this->dir . 'x2';
+        $this->object->mount('/disk', new Filesystem(new LocalDriver($dir)));
+
+        // put
+        $this->assertTrue($this->object->put('/bingo', 'wow'));
+        $this->assertTrue($this->object->put('/disk/bingo/b1', 'wow'));
+
+        // copy file into directory
+        $this->assertTrue($this->object->copy('/bingo', '/disk/bingo'));
+
+        $this->assertTrue($this->object->has('/disk/bingo/bingo'));
+        $this->assertTrue($this->object->has('/disk/bingo/b1'));
+
+        // clear
+        $this->assertTrue($this->object->delete('/bingo'));
+        $this->assertTrue($this->object->delete('/disk/bingo'));
 
         rmdir($dir);
     }
@@ -307,22 +447,50 @@ class StorageTest extends \PHPUnit_Framework_TestCase
     public function testCopy4()
     {
         // mount another filesystem
-        $dir = sys_get_temp_dir() . \DIRECTORY_SEPARATOR . (time() . 'y');
+        $dir = $this->dir . 'x3';
         $this->object->mount('/disk', new Filesystem(new LocalDriver($dir)));
 
         // put
-        $this->object->put('/b1/bingo1', 'wow1');
-        $this->object->put('/b1/b2/bingo2', 'wow2');
+        $this->assertTrue($this->object->put('/b1/bingo1', 'wow1'));
+        $this->assertTrue($this->object->put('/b1/b2/bingo2', 'wow2'));
 
         // copy
-        $this->object->copy('/b1', '/disk/b3');
+        $this->assertTrue($this->object->copy('/b1', '/disk/b3'));
 
         $this->assertEquals('wow1', $this->object->get('/disk/b3/bingo1'));
         $this->assertEquals('wow2', $this->object->get('/disk/b3/b2/bingo2'));
 
         // clear
-        $this->object->delete('/b1');
-        $this->object->delete('/disk/b3');
+        $this->assertTrue($this->object->delete('/b1'));
+        $this->assertTrue($this->object->delete('/disk/b3'));
+
+        rmdir($dir);
+    }
+
+    /**
+     * Test different filesystem dir copy ove file failure
+     *
+     * @cover Phossa2\Storage\Storage::copy()
+     */
+    public function testCopy40()
+    {
+        // mount another filesystem
+        $dir = $this->dir . 'x4';
+        $this->object->mount('/disk', new Filesystem(new LocalDriver($dir)));
+
+        // put
+        $this->assertTrue($this->object->put('/b1/bingo1', 'wow1'));
+        $this->assertTrue($this->object->put('/b1/b2/bingo2', 'wow2'));
+        $this->assertTrue($this->object->put('/disk/b3', 'wow3'));
+
+        // copy failure
+        $this->assertFalse($this->object->copy('/b1', '/disk/b3'));
+
+        $this->assertEquals('wow3', $this->object->get('/disk/b3'));
+
+        // clear
+        $this->assertTrue($this->object->delete('/b1'));
+        $this->assertTrue($this->object->delete('/disk/b3'));
 
         rmdir($dir);
     }
@@ -335,21 +503,46 @@ class StorageTest extends \PHPUnit_Framework_TestCase
     public function testMove1()
     {
         // put
-        $this->object->put('/bingo', 'wow');
-        $this->object->put('/bingo2', 'wow2');
+        $this->assertTrue($this->object->put('/bingo', 'wow'));
+        $this->assertTrue($this->object->put('/bingo2', 'wow2'));
 
         // move
-        $this->object->move('/bingo', '/bb/bingo2');
+        $this->assertTrue($this->object->move('/bingo', '/bb/bingo2'));
         $this->assertFalse($this->object->has('/bingo'));
         $this->assertEquals('wow', $this->object->get('/bb/bingo2'));
 
         // overwrite move
-        $this->object->move('/bingo2', '/bb/bingo2');
+        $this->assertTrue($this->object->move('/bingo2', '/bb/bingo2'));
         $this->assertFalse($this->object->has('/bingo2'));
         $this->assertEquals('wow2', $this->object->get('/bb/bingo2'));
 
         // clear
-        $this->object->delete('/bb');
+        $this->assertTrue($this->object->delete('/bb'));
+    }
+
+    /**
+     * Test same filesystem file move into dir
+     *
+     * @cover Phossa2\Storage\Storage::move()
+     */
+    public function testMove10()
+    {
+        // put
+        $this->assertTrue($this->object->put('/bingo', 'wow'));
+        $this->assertTrue($this->object->put('/bingo2', 'wow2'));
+
+        // move
+        $this->assertTrue($this->object->move('/bingo', '/bb/bingo2'));
+        $this->assertFalse($this->object->has('/bingo'));
+        $this->assertEquals('wow', $this->object->get('/bb/bingo2'));
+
+        // move into a dir and overwrite
+        $this->assertTrue($this->object->move('/bingo2', '/bb'));
+        $this->assertFalse($this->object->has('/bingo2'));
+        $this->assertEquals('wow2', $this->object->get('/bb/bingo2'));
+
+        // clear
+        $this->assertTrue($this->object->delete('/bb'));
     }
 
     /**
@@ -360,11 +553,11 @@ class StorageTest extends \PHPUnit_Framework_TestCase
     public function testMove2()
     {
         // put
-        $this->object->put('/b1/bingo1', 'wow1');
-        $this->object->put('/b1/b2/bingo2', 'wow2');
+        $this->assertTrue($this->object->put('/b1/bingo1', 'wow1'));
+        $this->assertTrue($this->object->put('/b1/b2/bingo2', 'wow2'));
 
-        // copy
-        $this->object->move('/b1', '/b3');
+        // move
+        $this->assertTrue($this->object->move('/b1', '/b3'));
 
         $this->assertFalse($this->object->has('/b1/bingo1'));
         $this->assertFalse($this->object->has('/b1/b2/bingo2'));
@@ -373,7 +566,29 @@ class StorageTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals('wow2', $this->object->get('/b3/b2/bingo2'));
 
         // clear
-        $this->object->delete('/b3');
+        $this->assertTrue($this->object->delete('/b3'));
+    }
+
+    /**
+     * Test same filesystem move dir over file
+     *
+     * @cover Phossa2\Storage\Storage::move()
+     */
+    public function testMove20()
+    {
+        // put
+        $this->assertTrue($this->object->put('/b1/bingo1', 'wow1'));
+        $this->assertTrue($this->object->put('/b1/b2/bingo2', 'wow2'));
+        $this->assertTrue($this->object->put('/b3', 'wow3'));
+
+        // directory overwrite file
+        $this->assertTrue($this->object->move('/b1', '/b3'));
+
+        $this->assertFalse($this->object->has('/b1/b2/bingo2'));
+        $this->assertTrue($this->object->has('/b3/b2/bingo2'));
+
+        // clear
+        $this->assertTrue($this->object->delete('/b3'));
     }
 
     /**
@@ -384,7 +599,7 @@ class StorageTest extends \PHPUnit_Framework_TestCase
     public function testMove3()
     {
         // mount another filesystem
-        $dir = sys_get_temp_dir() . \DIRECTORY_SEPARATOR . (time() . 'x');
+        $dir = $this->dir . 'x5';
         $this->object->mount('/disk', new Filesystem(new LocalDriver($dir)));
 
         // put
@@ -411,7 +626,7 @@ class StorageTest extends \PHPUnit_Framework_TestCase
     public function testMove4()
     {
         // mount another filesystem
-        $dir = sys_get_temp_dir() . \DIRECTORY_SEPARATOR . (time() . 'y');
+        $dir = $this->dir . 'x6';
         $this->object->mount('/disk', new Filesystem(new LocalDriver($dir)));
 
         // put

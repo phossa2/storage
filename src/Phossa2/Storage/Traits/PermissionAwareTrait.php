@@ -75,6 +75,6 @@ trait PermissionAwareTrait
      */
     public function isDeletable()/*# : bool */
     {
-        return (bool) ($this->perm & PermissionAwareInterface::PERM_DELETE);
+        return (bool) ($this->perm & PermissionAwareInterface::PERM_WRITE);
     }
 }

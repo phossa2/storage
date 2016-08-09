@@ -24,6 +24,7 @@ use Phossa2\Shared\Extension\ExtensionAwareTrait;
 use Phossa2\Storage\Interfaces\FilesystemInterface;
 use Phossa2\Shared\Extension\ExtensionAwareInterface;
 use Phossa2\Storage\Interfaces\FilesystemAwareInterface;
+use Phossa2\Storage\Interfaces\DriverInterface;
 
 /**
  * Path
@@ -81,13 +82,12 @@ class Path extends ObjectAbstract implements PathInterface, ErrorAwareInterface,
      */
     public function exists()/*# : bool */
     {
-        if (!$this->getFilesystem()->getDriver()->exists($this->path)) {
+        if (!$this->getDriver()->exists($this->path)) {
             return $this->setError(
                 Message::get(Message::MSG_PATH_NOTFOUND, $this->full),
                 Message::MSG_PATH_NOTFOUND
             );
         }
-
         return true;
     }
 
@@ -101,8 +101,8 @@ class Path extends ObjectAbstract implements PathInterface, ErrorAwareInterface,
             return null;
         }
 
-        $res = $this->getFilesystem()->getDriver()->getContent($this->path, $stream);
-        $this->copyError($this->getFilesystem()->getDriver());
+        $res = $this->getDriver()->getContent($this->path, $stream);
+        $this->resetError();
         return $res;
     }
 
@@ -111,13 +111,13 @@ class Path extends ObjectAbstract implements PathInterface, ErrorAwareInterface,
      */
     public function getMeta()/*# : array */
     {
-        if ($this->exists()) {
-            $res = $this->getFilesystem()->getDriver()->getMeta($this->path);
-            $this->copyError($this->getFilesystem()->getDriver());
-            return $res;
-        } else {
+        if (!$this->exists()) {
             return [];
         }
+
+        $res = $this->getDriver()->getMeta($this->path);
+        $this->resetError();
+        return $res;
     }
 
     /**
@@ -142,9 +142,8 @@ class Path extends ObjectAbstract implements PathInterface, ErrorAwareInterface,
     public function setContent($content)/*# : bool */
     {
         if ($this->isFilesystemWritable()) {
-            $res = $this->getFilesystem()->getDriver()
-                ->setContent($this->path, $content);
-            $this->copyError($this->getFilesystem()->getDriver());
+            $res = $this->getDriver()->setContent($this->path, $content);
+            $this->resetError();
             return $res;
         }
         return false;
@@ -160,8 +159,8 @@ class Path extends ObjectAbstract implements PathInterface, ErrorAwareInterface,
         }
 
         if (!empty($meta)) {
-            $res = $this->getFilesystem()->getDriver()->setMeta($this->path, $meta);
-            $this->copyError($this->getFilesystem()->getDriver());
+            $res = $this->getDriver()->setMeta($this->path, $meta);
+            $this->resetError();
             return $res;
         }
         return true;
@@ -170,9 +169,20 @@ class Path extends ObjectAbstract implements PathInterface, ErrorAwareInterface,
     /**
      * {@inheritDoc}
      */
+    public function isDir()/*# : bool */
+    {
+        if ($this->exists()) {
+            return $this->getDriver()->isDir($this->path);
+        }
+        return false;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
     public function rename(/*# string */ $destination)/*# : bool */
     {
-        return $this->action($destination, 'rename');
+        return $this->alterAction($destination, 'rename');
     }
 
     /**
@@ -180,7 +190,7 @@ class Path extends ObjectAbstract implements PathInterface, ErrorAwareInterface,
      */
     public function copy(/*# string */ $destination)/*# : bool */
     {
-        return $this->action($destination, 'copy');
+        return $this->alterAction($destination, 'copy');
     }
 
     /**
@@ -193,11 +203,32 @@ class Path extends ObjectAbstract implements PathInterface, ErrorAwareInterface,
                 return false;
             }
 
-            $res = $this->getFilesystem()->getDriver()->delete($this->path);
-            $this->copyError($this->getFilesystem()->getDriver());
+            $res = $this->getDriver()->delete($this->path);
+            $this->resetError();
             return $res;
         }
         return true;
+    }
+
+    /**
+     * Reset error to driver's error
+     *
+     * @access protected
+     */
+    protected function resetError()
+    {
+        $this->copyError($this->getFilesystem()->getDriver());
+    }
+
+    /**
+     * Get the driver
+     *
+     * @return DriverInterface
+     * @access protected
+     */
+    protected function getDriver()/*# : DriverInterface */
+    {
+        return $this->getFilesystem()->getDriver();
     }
 
     /**
@@ -208,7 +239,7 @@ class Path extends ObjectAbstract implements PathInterface, ErrorAwareInterface,
      * @return bool
      * @access protected
      */
-    protected function action(
+    protected function alterAction(
         /*# string */ $destination,
         /*# string */ $action
     )/*# : bool */ {
@@ -216,8 +247,13 @@ class Path extends ObjectAbstract implements PathInterface, ErrorAwareInterface,
             return false;
         }
 
-        $res = $this->getFilesystem()->getDriver()->{$action}($this->path, $destination);
-        $this->copyError($this->getFilesystem()->getDriver());
+        // destination is direcotry
+        if ($this->getDriver()->isDir($destination)) {
+            $destination .= '/' . basename($this->path);
+        }
+
+        $res = $this->getDriver()->{$action}($this->path, $destination);
+        $this->resetError();
         return (bool) $res;
     }
 

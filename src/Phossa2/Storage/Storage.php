@@ -134,11 +134,18 @@ class Storage extends ObjectAbstract implements StorageInterface, ErrorAwareInte
             return $this->sameFilesystemAction($from, $to, 'copy');
         }
 
+        if ($this->isDir($to)) {
+            $to = $this->mergePath($to, basename($from));
+        }
+
         $content = $this->get($from);
+
         if (is_null($content)) {
             return false;
+
         } elseif (is_array($content)) {
             return $this->copyDir($content, $to);
+
         } else {
             return $this->put($to, $content);
         }
@@ -172,6 +179,14 @@ class Storage extends ObjectAbstract implements StorageInterface, ErrorAwareInte
         $res = $obj->delete();
         $this->copyError($obj);
         return $res;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function isDir(/*# string */ $path)/*# : bool */
+    {
+        return $this->path($path)->isDir();
     }
 
     /**
@@ -219,8 +234,7 @@ class Storage extends ObjectAbstract implements StorageInterface, ErrorAwareInte
     protected function copyDir(array $paths, /*# string */ $destination)
     {
         foreach ($paths as $path) {
-            $base = basename($path);
-            $dest = $this->mergePath($destination, $base);
+            $dest = $this->mergePath($destination, basename($path));
             if (!$this->copy($path, $dest)) {
                 return false;
             }

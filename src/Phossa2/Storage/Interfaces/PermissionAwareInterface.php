@@ -29,11 +29,10 @@ interface PermissionAwareInterface
     /**
      * constants
      */
-    const PERM_ALL    = 0777;
-    const PERM_OTHER  = 0077;
+    const PERM_ALL    = 0666;
+    const PERM_OTHER  = 0066;
     const PERM_READ   = 0400;
     const PERM_WRITE  = 0200;
-    const PERM_DELETE = 0100;
 
     /**
      * Get current permissions

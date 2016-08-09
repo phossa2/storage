@@ -73,6 +73,15 @@ interface DriverInterface
     public function setMeta(/*# string */ $path, array $meta)/*# : bool */;
 
     /**
+     * Is path a directory ?
+     *
+     * @param  string $path
+     * @return bool
+     * @access public
+     */
+    public function isDir(/*# string */ $path)/*# : bool */;
+
+    /**
      * Rename
      *
      * @param  string $from

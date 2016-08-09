@@ -27,6 +27,7 @@ interface PathInterface
     /**
      * Does this path exist ?
      *
+     * @param  bool $forceCheck force checking instead of using cache
      * @return bool
      * @access public
      * @api
@@ -87,6 +88,15 @@ interface PathInterface
      * @api
      */
     public function setMeta(array $meta)/*# : bool */;
+
+    /**
+     * Is path a directory
+     *
+     * @return bool
+     * @access public
+     * @api
+     */
+    public function isDir()/*# : bool */;
 
     /**
      * rename to destination

@@ -44,7 +44,7 @@ class NullDriver extends DriverAbstract
     /**
      * {@inheritDoc}
      */
-    protected function isDir(/*# string */ $realPath)/*# : bool */
+    protected function isRealDir(/*# string */ $realPath)/*# : bool */
     {
         return false;
     }

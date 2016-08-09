@@ -118,4 +118,14 @@ interface StorageInterface extends MountableInterface, PathAwareInterface
      * @api
      */
     public function delete(/*# string */ $path)/*# : bool */;
+
+    /**
+     * Is path a directory
+     *
+     * @param  string $path
+     * @return bool
+     * @access public
+     * @api
+     */
+    public function isDir(/*# string */ $path)/*# : bool */;
 }

@@ -61,7 +61,7 @@ abstract class DriverAbstract extends ObjectAbstract implements DriverInterface,
     public function getContent(/*# string */ $path, /*# bool */ $stream = false)
     {
         $real = $this->realPath($path);
-        if ($this->isDir($real)) {
+        if ($this->isRealDir($real)) {
             return $this->readDir($real, rtrim($path, '/\\') . '/');
 
         } elseif ($stream) {
@@ -79,7 +79,7 @@ abstract class DriverAbstract extends ObjectAbstract implements DriverInterface,
     {
         $real = $this->realPath($path);
 
-        if ($this->isDir($real)) {
+        if ($this->isRealDir($real)) {
             return [];
 
         } elseif ($this->use_metafile) {
@@ -136,13 +136,22 @@ abstract class DriverAbstract extends ObjectAbstract implements DriverInterface,
     /**
      * {@inheritDoc}
      */
+    public function isDir(/*# string */ $path)/*# : bool */
+    {
+        $real = $this->realPath($path);
+        return $this->isRealDir($real);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
     public function rename(/*# string */ $from, /*# string */ $to)/*# : bool */
     {
         $real_from = $this->realPath($from);
         $real_to = $this->realPath($to);
 
         if ($this->ensurePath($real_to)) {
-            if ($this->isDir($real_from)) {
+            if ($this->isRealDir($real_from)) {
                 $res = $this->renameDir($real_from, $real_to);
             } else {
                 $res = $this->renameFile($real_from, $real_to);
@@ -165,7 +174,7 @@ abstract class DriverAbstract extends ObjectAbstract implements DriverInterface,
         $real_to = $this->realPath($to);
 
         if ($this->ensurePath($real_to)) {
-            if ($this->isDir($real_from)) {
+            if ($this->isRealDir($real_from)) {
                 $res = $this->copyDir($real_from, $real_to);
             } else {
                 $res = $this->copyFile($real_from, $real_to);
@@ -186,7 +195,7 @@ abstract class DriverAbstract extends ObjectAbstract implements DriverInterface,
     {
         $real = $this->realPath($path);
 
-        if ($this->isDir($real)) {
+        if ($this->isRealDir($real)) {
             return $this->deleteDir($real);
         } else {
             if ($this->use_metafile) {
@@ -220,7 +229,7 @@ abstract class DriverAbstract extends ObjectAbstract implements DriverInterface,
      * @return bool
      * @access protected
      */
-    abstract protected function isDir(/*# string */ $realPath)/*# : bool */;
+    abstract protected function isRealDir(/*# string */ $realPath)/*# : bool */;
 
     /**
      * Read directory, returns an array of paths in this directory

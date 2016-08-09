@@ -31,7 +31,7 @@ trait LocalDirTrait
     /**
      * {@inheritDoc}
      */
-    protected function isDir(/*# string */ $realPath)/*# : bool */
+    protected function isRealDir(/*# string */ $realPath)/*# : bool */
     {
         return is_dir($realPath);
     }
@@ -67,9 +67,8 @@ trait LocalDirTrait
         /*# string */ $from,
         /*# string */ $to
     )/*# : bool */ {
-        return rename($from, $to);
+        return @rename($from, $to);
     }
-
 
     /**
      * {@inheritDoc}
@@ -78,16 +77,19 @@ trait LocalDirTrait
         /*# string */ $from,
         /*# string */ $to
     )/*# : bool */ {
-        $files = $this->readDir($from);
+        if (!$this->makeDirectory($to)) {
+            return false;
+        }
 
+        $files = $this->readDir($from);
         foreach ($files as $file) {
             $f = $from . \DIRECTORY_SEPARATOR . $file;
             $t = $to . \DIRECTORY_SEPARATOR . $file;
             if (is_dir($f)) {
-                $this->makeDirectory($t);
+
                 $res = $this->copyDir($f, $t);
             } else {
-                $res = copy($f, $t);
+                $res = @copy($f, $t);
             }
             if (false === $res) {
                 return false;
@@ -114,7 +116,7 @@ trait LocalDirTrait
                 return $this->setError(
                     Message::get(Message::STR_DELETE_FAIL, $file),
                     Message::STR_DELETE_FAIL
-                    );
+                );
             }
         }
         return rmdir($realPath);
@@ -130,7 +132,7 @@ trait LocalDirTrait
     {
         if (!is_dir($dir)) {
             $umask = umask(0);
-            mkdir($dir, 0755, true);
+            @mkdir($dir, 0755, true);
             umask($umask);
 
             if (!is_dir($dir)) {

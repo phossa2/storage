@@ -154,8 +154,7 @@ class LocalDriver extends DriverAbstract
             if (is_resource($stream)) {
                 stream_copy_to_stream($resource, $stream);
                 fclose($stream);
-                return rename($tmpfname, $realPath) &&
-                    chmod($realPath, PermissionAwareInterface::PERM_ALL);
+                return $this->renameTempFile($tmpfname, $realPath);
             }
         }
         return false;
@@ -175,9 +174,7 @@ class LocalDriver extends DriverAbstract
             fwrite($handle, $content);
             fclose($handle);
 
-            // rename to $realPath
-            return rename($tmpfname, $realPath) &&
-                chmod($realPath, PermissionAwareInterface::PERM_ALL);
+            return $this->renameTempFile($tmpfname, $realPath);
         }
         return false;
     }
@@ -208,7 +205,7 @@ class LocalDriver extends DriverAbstract
         /*# string */ $from,
         /*# string */ $to
     )/*# : bool */ {
-        return rename($from, $to);
+        return @rename($from, $to);
     }
 
     /**
@@ -218,7 +215,7 @@ class LocalDriver extends DriverAbstract
         /*# string */ $from,
         /*# string */ $to
     )/*# : bool */ {
-        return copy($from, $to);
+        return @copy($from, $to);
     }
 
     /**
@@ -227,5 +224,27 @@ class LocalDriver extends DriverAbstract
     protected function deleteFile(/*# string */ $realPath)/*# : bool */
     {
         return unlink($realPath);
+    }
+
+    /**
+     * Rename tmpfile
+     *
+     * @param  string $tmpFile
+     * @param  string $realPath
+     * @return bool
+     * @access protected
+     */
+    protected function renameTempFile(
+        /*# string */ $tmpFile,
+        /*# string */ $realPath
+    )/*# : bool */ {
+        if (@rename($tmpFile, $realPath) &&
+            @chmod($realPath, PermissionAwareInterface::PERM_ALL)) {
+            return true;
+        }
+        $err = error_get_last();
+        $this->setError($err['message'], Message::STR_WRITEFILE_FAIL);
+        @unlink($tmpFile);
+        return false;
     }
 }
