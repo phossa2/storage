@@ -201,15 +201,12 @@ class Storage extends ObjectAbstract implements StorageInterface, ErrorAwareInte
             $to = $this->mergePath($to, basename($from));
         }
 
-        // read contents of $content
         $content = $this->get($from);
 
         if (is_null($content)) {
             return false;
-
         } elseif (is_array($content)) {
             return $this->copyDir($content, $to);
-
         } else {
             return $this->put($to, $content);
         }
