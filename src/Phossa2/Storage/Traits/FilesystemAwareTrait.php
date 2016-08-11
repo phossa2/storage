@@ -57,16 +57,17 @@ trait FilesystemAwareTrait
     /**
      * Check filesystem readable or not
      *
+     * @param  string $path path to check
      * @return bool
      * @access protected
      */
-    protected function isFilesystemReadable()/*# : bool */
+    protected function isFilesystemReadable(/*# string */ $path)/*# : bool */
     {
         if ($this->getFilesystem()->isReadable()) {
             return true;
         } else {
             return $this->setError(
-                Message::get(Message::STR_FS_NONREADABLE, $this->full),
+                Message::get(Message::STR_FS_NONREADABLE, $path),
                 Message::STR_FS_NONREADABLE
             );
         }
@@ -75,16 +76,17 @@ trait FilesystemAwareTrait
     /**
      * Check filesystem writable or not
      *
+     * @param  string $path path to check
      * @return bool
      * @access protected
      */
-    protected function isFilesystemWritable()/*# : bool */
+    protected function isFilesystemWritable(/*# string */ $path)/*# : bool */
     {
         if ($this->getFilesystem()->isWritable()) {
             return true;
         } else {
             return $this->setError(
-                Message::get(Message::STR_FS_NONWRITABLE, $this->full),
+                Message::get(Message::STR_FS_NONWRITABLE, $path),
                 Message::STR_FS_NONWRITABLE
             );
         }
@@ -93,16 +95,17 @@ trait FilesystemAwareTrait
     /**
      * Check filesystem file deletable or not
      *
+     * @param  string $path path to check
      * @return bool
      * @access protected
      */
-    protected function isFilesystemDeletable()/*# : bool */
+    protected function isFilesystemDeletable(/*# string */ $path)/*# : bool */
     {
         if ($this->getFilesystem()->isDeletable()) {
             return true;
         } else {
             return $this->setError(
-                Message::get(Message::STR_FS_NONDELETABLE, $this->full),
+                Message::get(Message::STR_FS_NONDELETABLE, $path),
                 Message::STR_FS_NONDELETABLE
             );
         }

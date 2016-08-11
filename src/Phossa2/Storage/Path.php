@@ -97,7 +97,7 @@ class Path extends ObjectAbstract implements PathInterface, ErrorAwareInterface,
      */
     public function getContent(/*# bool */ $stream = false)
     {
-        if ($this->exists() && $this->isFilesystemReadable()) {
+        if ($this->exists() && $this->isFilesystemReadable($this->full)) {
             $res = $this->getDriver()->getContent($this->path, $stream);
             $this->resetError();
             return $res;
@@ -140,7 +140,7 @@ class Path extends ObjectAbstract implements PathInterface, ErrorAwareInterface,
      */
     public function setContent($content)/*# : bool */
     {
-        if ($this->isFilesystemWritable() &&
+        if ($this->isFilesystemWritable($this->full) &&
             !$this->hasTrailingSlash($this->path)
         ) {
             $res = $this->getDriver()->setContent($this->path, $content);
@@ -201,7 +201,7 @@ class Path extends ObjectAbstract implements PathInterface, ErrorAwareInterface,
     public function delete()/*# : bool */
     {
         if ($this->exists()) {
-            if (!$this->isFilesystemDeletable()) {
+            if (!$this->isFilesystemDeletable($this->full)) {
                 return false;
             }
 
@@ -235,7 +235,7 @@ class Path extends ObjectAbstract implements PathInterface, ErrorAwareInterface,
         /*# string */ $destination,
         /*# string */ $action
     )/*# : bool */ {
-        if (!$this->exists() || !$this->isFilesystemWritable()) {
+        if (!$this->exists() || !$this->isFilesystemWritable($this->full)) {
             return false;
         }
 
