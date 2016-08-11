@@ -312,6 +312,10 @@ class StorageTest extends \PHPUnit_Framework_TestCase
         $this->assertTrue($this->object->copy('/bingo2', '/bb/bingo2'));
         $this->assertEquals('wow2', $this->object->get('/bb/bingo2'));
 
+        // copy with trailing slash
+        $this->assertTrue($this->object->copy('/bingo2', '/bx/'));
+        $this->assertEquals('wow2', $this->object->get('/bx/bingo2'));
+
         // clear
         $this->assertTrue($this->object->del('/bingo'));
         $this->assertTrue($this->object->del('/bingo2'));
@@ -464,7 +468,7 @@ class StorageTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * Test different filesystem dir copy over file is OK
+     * Test different filesystem dir copy over file is NOT OK !!
      *
      * @cover Phossa2\Storage\Storage::copy()
      */
@@ -479,14 +483,12 @@ class StorageTest extends \PHPUnit_Framework_TestCase
         $this->assertTrue($this->object->put('/b1/b2/bingo2', 'wow2'));
         $this->assertTrue($this->object->put('/disk/b3', 'wow3'));
 
-        // copy ok
-        $this->assertTrue($this->object->copy('/b1', '/disk/b3'));
-
-        $this->assertEquals('wow1', $this->object->get('/disk/b3/bingo1'));
+        // copy dir over existing file is not OK
+        $this->assertFalse($this->object->copy('/b1', '/disk/b3'));
 
         // clear
         $this->assertTrue($this->object->del('/b1'));
-        $this->assertTrue($this->object->del('/disk/b3'));
+        $this->assertTrue($this->object->del('/disk'));
 
         @rmdir($dir);
     }

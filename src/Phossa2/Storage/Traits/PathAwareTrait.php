@@ -75,7 +75,7 @@ trait PathAwareTrait
     {
         $pattern = ['~/{2,}~', '~/(\./)+~', '~([^/\.]+/(?R)*\.{2,}/)~', '~\.\./~'];
         $replace = ['/', '/', '', ''];
-        return '/' . trim(preg_replace($pattern, $replace, $path), '/');
+        return '/' . ltrim(preg_replace($pattern, $replace, $path), '/');
     }
 
     /**

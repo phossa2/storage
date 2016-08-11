@@ -141,7 +141,9 @@ class Path extends ObjectAbstract implements PathInterface, ErrorAwareInterface,
      */
     public function setContent($content)/*# : bool */
     {
-        if ($this->isFilesystemWritable()) {
+        if ($this->isFilesystemWritable() &&
+            !$this->hasTrailingSlash($this->path)
+        ) {
             $res = $this->getDriver()->setContent($this->path, $content);
             $this->resetError();
             return $res;
@@ -171,8 +173,10 @@ class Path extends ObjectAbstract implements PathInterface, ErrorAwareInterface,
      */
     public function isDir()/*# : bool */
     {
-        if ($this->exists()) {
-            return $this->getDriver()->isDir($this->path);
+        if ($this->hasTrailingSlash($this->path) ||
+            $this->getDriver()->isDir($this->path)
+        ) {
+            return true;
         }
         return false;
     }
@@ -232,7 +236,7 @@ class Path extends ObjectAbstract implements PathInterface, ErrorAwareInterface,
     }
 
     /**
-     * Do copy or rename
+     * Do copy or rename in same filesystem
      *
      * @param  string $destination
      * @param  string $action 'copy' or 'rename'
@@ -248,13 +252,31 @@ class Path extends ObjectAbstract implements PathInterface, ErrorAwareInterface,
         }
 
         // destination is direcotry
-        if ($this->getDriver()->isDir($destination)) {
+        if ($this->hasTrailingSlash($destination) ||
+            $this->getDriver()->isDir($destination)
+        ) {
             $destination = rtrim($destination, '/') . '/' . basename($this->path);
         }
 
         $res = $this->getDriver()->{$action}($this->path, $destination);
         $this->resetError();
         return (bool) $res;
+    }
+
+    /**
+     * Is current path has trailing '/'
+     *
+     * @param  string $path
+     * @return bool
+     * @access protected
+     */
+    protected function hasTrailingSlash(/*# string */ $path)/*# : bool */
+    {
+        if ($path && '/' == $path[strlen($path)-1]) {
+            return true;
+        } else {
+            return false;
+        }
     }
 
     /**
