@@ -557,6 +557,7 @@ class StorageTest extends \PHPUnit_Framework_TestCase
 
         // move, directory overwrite file is NOT ok
         $this->assertTrue($this->object->move('/b1', '/b3'));
+        sleep(1);
 
         $this->assertFalse($this->object->has('/b1/bingo1'));
         $this->assertFalse($this->object->has('/b1/b2/bingo2'));
