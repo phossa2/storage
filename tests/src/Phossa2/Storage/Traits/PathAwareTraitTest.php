@@ -106,9 +106,10 @@ class PathAwareTraitTest extends \PHPUnit_Framework_TestCase
      */
     public function testSplitPath()
     {
-        $this->object->mount('/', new Filesystem(new LocalDriver('/test')));
-        $this->object->mount('/usr', new Filesystem(new LocalDriver('/test/usr/')));
-        $this->object->mount('/usr/bin', new Filesystem(new LocalDriver('/test/usr/bin')));
+        $dir = sys_get_temp_dir();
+        $this->object->mount('/', new Filesystem(new LocalDriver($dir . '/test')));
+        $this->object->mount('/usr', new Filesystem(new LocalDriver($dir . '/test/usr/')));
+        $this->object->mount('/usr/bin', new Filesystem(new LocalDriver($dir . '/test/usr/bin')));
 
         $p1 = '/local/test';
         list($pref, $suff) = $this->invokeMethod('splitPath', [$p1]);
