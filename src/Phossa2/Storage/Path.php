@@ -171,11 +171,10 @@ class Path extends ObjectAbstract implements PathInterface, ErrorAwareInterface,
     /**
      * {@inheritDoc}
      */
-    public function isDir()/*# : bool */
+    public function isDir(/*# string */ $path = '')/*# : bool */
     {
-        if ($this->hasTrailingSlash($this->path) ||
-            $this->getDriver()->isDir($this->path)
-        ) {
+        $p = $path ?: $this->path;
+        if ($this->hasTrailingSlash($p) || $this->getDriver()->isDir($p)) {
             return true;
         }
         return false;
@@ -252,9 +251,7 @@ class Path extends ObjectAbstract implements PathInterface, ErrorAwareInterface,
         }
 
         // destination is direcotry
-        if ($this->hasTrailingSlash($destination) ||
-            $this->getDriver()->isDir($destination)
-        ) {
+        if ($this->isDir($destination)) {
             $destination = rtrim($destination, '/') . '/' . basename($this->path);
         }
 

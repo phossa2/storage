@@ -89,13 +89,14 @@ interface PathInterface
     public function setMeta(array $meta)/*# : bool */;
 
     /**
-     * Is path a directory
+     * Is $this->path or $path a directory
      *
+     * @param  string $path path to check if not empty
      * @return bool
      * @access public
      * @api
      */
-    public function isDir()/*# : bool */;
+    public function isDir(/*# string */ $path = '')/*# : bool */;
 
     /**
      * rename to destination
