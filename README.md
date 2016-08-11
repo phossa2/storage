@@ -119,7 +119,7 @@ Features
     $storage->copy('/local/README.txt', '/aws/www/');
     ```
 
-- <a name="unified"></a>**Unified path syntaxt**
+- <a name="unified"></a>**Unified path syntax**
 
   Uses unified path syntax like `/local/dir/file.txt' for all systems including
   windows. The underlying driver is responsible for translating path

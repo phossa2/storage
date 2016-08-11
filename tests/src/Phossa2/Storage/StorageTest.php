@@ -36,7 +36,7 @@ class StorageTest extends \PHPUnit_Framework_TestCase
     {
         $this->object = null;
         usleep(100000);
-        rmdir($this->dir);
+        @rmdir($this->dir);
         parent::tearDown();
     }
 
@@ -404,7 +404,7 @@ class StorageTest extends \PHPUnit_Framework_TestCase
         $this->assertTrue($this->object->del('/bingo'));
         $this->assertTrue($this->object->del('/disk'));
 
-        rmdir($dir);
+        @rmdir($dir);
     }
 
     /**
@@ -432,7 +432,7 @@ class StorageTest extends \PHPUnit_Framework_TestCase
         $this->assertTrue($this->object->del('/bingo'));
         $this->assertTrue($this->object->del('/disk'));
 
-        rmdir($dir);
+        @rmdir($dir);
     }
 
     /**
@@ -460,7 +460,7 @@ class StorageTest extends \PHPUnit_Framework_TestCase
         $this->assertTrue($this->object->del('/b1'));
         $this->assertTrue($this->object->del('/disk/b3'));
 
-        rmdir($dir);
+        @rmdir($dir);
     }
 
     /**
@@ -488,7 +488,7 @@ class StorageTest extends \PHPUnit_Framework_TestCase
         $this->assertTrue($this->object->del('/b1'));
         $this->assertTrue($this->object->del('/disk/b3'));
 
-        rmdir($dir);
+        @rmdir($dir);
     }
 
     /**
@@ -553,7 +553,7 @@ class StorageTest extends \PHPUnit_Framework_TestCase
         $this->assertTrue($this->object->put('/b1/b2/bingo2', 'wow2'));
         //$this->assertTrue($this->object->put('/b3', 'wow3'));
 
-        // move, directory overwrite file is ok
+        // move, directory overwrite file is NOT ok
         $this->assertTrue($this->object->move('/b1', '/b3'));
 
         $this->assertFalse($this->object->has('/b1/bingo1'));
@@ -596,7 +596,7 @@ class StorageTest extends \PHPUnit_Framework_TestCase
         $this->assertTrue($this->object->del('/disk'));
         $this->assertTrue($this->object->del('/'));
 
-        rmdir($dir);
+        @rmdir($dir);
     }
 
     /**
@@ -623,7 +623,7 @@ class StorageTest extends \PHPUnit_Framework_TestCase
         // clear
         $this->assertTrue($this->object->del('/disk'));
 
-        rmdir($dir);
+        @rmdir($dir);
     }
 
     /**
@@ -648,7 +648,7 @@ class StorageTest extends \PHPUnit_Framework_TestCase
         // clear
         $this->assertTrue($this->object->del('/disk/b3'));
 
-        rmdir($dir);
+        @rmdir($dir);
     }
 
     /**
@@ -704,6 +704,6 @@ class StorageTest extends \PHPUnit_Framework_TestCase
         // clear
         $this->assertTrue($this->object->del('/'));
 
-        rmdir($dir);
+        @rmdir($dir);
     }
 }
