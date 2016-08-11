@@ -96,14 +96,12 @@ class Path extends ObjectAbstract implements PathInterface, ErrorAwareInterface,
      */
     public function getContent(/*# bool */ $stream = false)
     {
-        // not exists or filesystem not readable
-        if (!$this->exists() || !$this->isFilesystemReadable()) {
-            return null;
+        if ($this->exists() && $this->isFilesystemReadable()) {
+            $res = $this->getDriver()->getContent($this->path, $stream);
+            $this->resetError();
+            return $res;
         }
-
-        $res = $this->getDriver()->getContent($this->path, $stream);
-        $this->resetError();
-        return $res;
+        return null;
     }
 
     /**
@@ -250,7 +248,6 @@ class Path extends ObjectAbstract implements PathInterface, ErrorAwareInterface,
             return false;
         }
 
-        // destination is direcotry
         if ($this->isDir($destination)) {
             $destination = rtrim($destination, '/') . '/' . basename($this->path);
         }
