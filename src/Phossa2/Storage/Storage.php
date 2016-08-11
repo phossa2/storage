@@ -74,10 +74,10 @@ class Storage extends ObjectAbstract implements StorageInterface, ErrorAwareInte
     /**
      * {@inheritDoc}
      */
-    public function get(/*# string */ $path, /*# bool */ $stream = false)
+    public function get(/*# string */ $path, /*# bool */ $getAsStream = false)
     {
         $obj = $this->path($path);
-        $res = $obj->getContent($stream);
+        $res = $obj->getContent($getAsStream);
 
         // append mount point if result is array
         if (is_array($res)) {

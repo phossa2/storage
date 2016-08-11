@@ -44,12 +44,12 @@ interface StorageInterface extends MountableInterface, PathAwareInterface
      * - if is directory, returns ARRAY of paths
      *
      * @param  string $path
-     * @param  bool $stream return a stream to read from
+     * @param  bool $getAsStream return a stream to read from
      * @return null|string|array|resource
      * @access public
      * @api
      */
-    public function get(/*# string */ $path, /*# bool */ $stream = false);
+    public function get(/*# string */ $path, /*# bool */ $getAsStream = false);
 
     /**
      * Write content and meta data to the path

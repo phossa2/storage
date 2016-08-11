@@ -21,7 +21,7 @@ class StorageTest extends \PHPUnit_Framework_TestCase
         parent::setUp();
 
         $this->dir = sys_get_temp_dir() . \DIRECTORY_SEPARATOR .
-            microtime(true) . rand(0, 100);
+            rand(100, 999) . microtime(true);
 
         $this->object = new Storage(
             '/',
@@ -35,6 +35,7 @@ class StorageTest extends \PHPUnit_Framework_TestCase
     protected function tearDown()
     {
         $this->object = null;
+        usleep(100000);
         rmdir($this->dir);
         parent::tearDown();
     }
@@ -148,10 +149,7 @@ class StorageTest extends \PHPUnit_Framework_TestCase
         $this->assertTrue($this->object->put('/b1/b3', 'wow'));
         $this->assertTrue($this->object->put('/b1/b4/b5', 'wow'));
 
-        $this->assertEquals(
-            ['/b1/b2', '/b1/b3', '/b1/b4'],
-            $this->object->get('/b1')
-        );
+        $this->assertEquals(3, sizeof($this->object->get('/b1')));
 
         // check file in sub dir
         $this->assertEquals('wow', $this->object->get('/b1/b4/b5'));
@@ -162,10 +160,7 @@ class StorageTest extends \PHPUnit_Framework_TestCase
 
         $this->assertEquals('wow', $this->object->get('/b1/b3'));
 
-        $this->assertEquals(
-            ['/b1/b2', '/b1/b3'],
-            $this->object->get('/b1')
-        );
+        $this->assertEquals(2, sizeof($this->object->get('/b1')));
 
         // clear
         $this->assertTrue($this->object->del('/b1'));
@@ -407,7 +402,7 @@ class StorageTest extends \PHPUnit_Framework_TestCase
 
         // clear
         $this->assertTrue($this->object->del('/bingo'));
-        $this->assertTrue($this->object->del('/disk/bingo'));
+        $this->assertTrue($this->object->del('/disk'));
 
         rmdir($dir);
     }
@@ -435,7 +430,7 @@ class StorageTest extends \PHPUnit_Framework_TestCase
 
         // clear
         $this->assertTrue($this->object->del('/bingo'));
-        $this->assertTrue($this->object->del('/disk/bingo'));
+        $this->assertTrue($this->object->del('/disk'));
 
         rmdir($dir);
     }
@@ -560,6 +555,7 @@ class StorageTest extends \PHPUnit_Framework_TestCase
 
         // move, directory overwrite file is ok
         $this->assertTrue($this->object->move('/b1', '/b3'));
+        usleep(20000);
 
         $this->assertFalse($this->object->has('/b1/bingo1'));
         $this->assertFalse($this->object->has('/b1/b2/bingo2'));
@@ -568,7 +564,7 @@ class StorageTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals('wow2', $this->object->get('/b3/b2/bingo2'));
 
         // clear
-        $this->assertTrue($this->object->del('/b3'));
+        $this->assertTrue($this->object->del('/'));
     }
 
     /**
@@ -598,8 +594,8 @@ class StorageTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals('wow', $this->object->get('/b1/b2/bingo'));
 
         // clear
-        $this->assertTrue($this->object->del('/disk/bingo'));
-        $this->assertTrue($this->object->del('/b1'));
+        $this->assertTrue($this->object->del('/disk'));
+        $this->assertTrue($this->object->del('/'));
 
         rmdir($dir);
     }
@@ -626,7 +622,7 @@ class StorageTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals('wow2', $this->object->get('/disk/b3/b2/bingo2'));
 
         // clear
-        $this->assertTrue($this->object->del('/disk/b3'));
+        $this->assertTrue($this->object->del('/disk'));
 
         rmdir($dir);
     }
