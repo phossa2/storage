@@ -19,12 +19,12 @@ use Phossa2\Shared\Base\ObjectAbstract;
 use Phossa2\Shared\Error\ErrorAwareTrait;
 use Phossa2\Shared\Error\ErrorAwareInterface;
 use Phossa2\Storage\Interfaces\PathInterface;
+use Phossa2\Storage\Interfaces\DriverInterface;
 use Phossa2\Storage\Traits\FilesystemAwareTrait;
 use Phossa2\Shared\Extension\ExtensionAwareTrait;
 use Phossa2\Storage\Interfaces\FilesystemInterface;
 use Phossa2\Shared\Extension\ExtensionAwareInterface;
 use Phossa2\Storage\Interfaces\FilesystemAwareInterface;
-use Phossa2\Storage\Interfaces\DriverInterface;
 
 /**
  * Path
@@ -35,6 +35,7 @@ use Phossa2\Storage\Interfaces\DriverInterface;
  * @see     PathInterface
  * @see     ErrorAwareInterface
  * @see     FilesystemAwareInterface
+ * @see     ExtensionAwareInterface
  * @version 2.0.0
  * @since   2.0.0 added
  */
@@ -212,16 +213,6 @@ class Path extends ObjectAbstract implements PathInterface, ErrorAwareInterface,
     }
 
     /**
-     * Reset error to driver's error
-     *
-     * @access protected
-     */
-    protected function resetError()
-    {
-        $this->copyError($this->getFilesystem()->getDriver());
-    }
-
-    /**
      * Get the driver
      *
      * @return DriverInterface
@@ -274,56 +265,12 @@ class Path extends ObjectAbstract implements PathInterface, ErrorAwareInterface,
     }
 
     /**
-     * Check filesystem readable or not
+     * Reset error to driver's error
      *
-     * @return bool
      * @access protected
      */
-    protected function isFilesystemReadable()/*# : bool */
+    protected function resetError()
     {
-        if ($this->getFilesystem()->isReadable()) {
-            return true;
-        } else {
-            return $this->setError(
-                Message::get(Message::STR_FS_NONREADABLE, $this->full),
-                Message::STR_FS_NONREADABLE
-            );
-        }
-    }
-
-    /**
-     * Check filesystem writable or not
-     *
-     * @return bool
-     * @access protected
-     */
-    protected function isFilesystemWritable()/*# : bool */
-    {
-        if ($this->getFilesystem()->isWritable()) {
-            return true;
-        } else {
-            return $this->setError(
-                Message::get(Message::STR_FS_NONWRITABLE, $this->full),
-                Message::STR_FS_NONWRITABLE
-            );
-        }
-    }
-
-    /**
-     * Check filesystem file deletable or not
-     *
-     * @return bool
-     * @access protected
-     */
-    protected function isFilesystemDeletable()/*# : bool */
-    {
-        if ($this->getFilesystem()->isDeletable()) {
-            return true;
-        } else {
-            return $this->setError(
-                Message::get(Message::STR_FS_NONDELETABLE, $this->full),
-                Message::STR_FS_NONDELETABLE
-            );
-        }
+        $this->copyError($this->getFilesystem()->getDriver());
     }
 }

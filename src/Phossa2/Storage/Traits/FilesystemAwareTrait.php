@@ -16,6 +16,7 @@ namespace Phossa2\Storage\Traits;
 
 use Phossa2\Storage\Interfaces\FilesystemInterface;
 use Phossa2\Storage\Interfaces\FilesystemAwareInterface;
+use Phossa2\Storage\Message\Message;
 
 /**
  * FilesystemAwareTrait
@@ -52,4 +53,63 @@ trait FilesystemAwareTrait
     {
         return $this->filesystem;
     }
+
+    /**
+     * Check filesystem readable or not
+     *
+     * @return bool
+     * @access protected
+     */
+    protected function isFilesystemReadable()/*# : bool */
+    {
+        if ($this->getFilesystem()->isReadable()) {
+            return true;
+        } else {
+            return $this->setError(
+                Message::get(Message::STR_FS_NONREADABLE, $this->full),
+                Message::STR_FS_NONREADABLE
+            );
+        }
+    }
+
+    /**
+     * Check filesystem writable or not
+     *
+     * @return bool
+     * @access protected
+     */
+    protected function isFilesystemWritable()/*# : bool */
+    {
+        if ($this->getFilesystem()->isWritable()) {
+            return true;
+        } else {
+            return $this->setError(
+                Message::get(Message::STR_FS_NONWRITABLE, $this->full),
+                Message::STR_FS_NONWRITABLE
+            );
+        }
+    }
+
+    /**
+     * Check filesystem file deletable or not
+     *
+     * @return bool
+     * @access protected
+     */
+    protected function isFilesystemDeletable()/*# : bool */
+    {
+        if ($this->getFilesystem()->isDeletable()) {
+            return true;
+        } else {
+            return $this->setError(
+                Message::get(Message::STR_FS_NONDELETABLE, $this->full),
+                Message::STR_FS_NONDELETABLE
+            );
+        }
+    }
+
+    abstract public function setError(
+        /*# string */ $message = '',
+        /*# string */ $code = ''
+    )/*# : bool */;
 }
