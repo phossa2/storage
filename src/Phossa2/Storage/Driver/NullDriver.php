@@ -20,8 +20,9 @@ namespace Phossa2\Storage\Driver;
  * @package Phossa2\Storage
  * @author  Hong Zhang <phossa@126.com>
  * @see     DriverAbstract
- * @version 2.0.0
+ * @version 2.0.1
  * @since   2.0.0 added
+ * @since   2.0.1 added makeDirectory()
  */
 class NullDriver extends DriverAbstract
 {
@@ -57,6 +58,15 @@ class NullDriver extends DriverAbstract
         /*# string */ $prefix = ''
     )/*# : array */ {
         return [];
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    protected function makeDirectory(
+        /*# string */ $realPath
+    )/*# : bool */ {
+        return true;
     }
 
     /**
