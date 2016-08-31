@@ -46,11 +46,12 @@ trait LocalDirTrait
         try {
             $res = [];
             foreach (new \DirectoryIterator($realPath) as $fileInfo) {
-                if($fileInfo->isDot()) continue;
+                if ($fileInfo->isDot()) {
+                    continue;
+                }
                 $res[] = $prefix . $fileInfo->getFilename();
             }
             return $res;
-
         } catch (\Exception $e) {
             $this->setError(
                 Message::get(Message::STR_READDIR_FAIL, $realPath),

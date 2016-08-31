@@ -82,7 +82,8 @@ class Storage extends ObjectAbstract implements StorageInterface, ErrorAwareInte
         // append mount point if result is array
         if (is_array($res)) {
             return $this->prependMountPoint(
-                $res, $this->getMountPoint($obj->getFullPath())
+                $res,
+                $this->getMountPoint($obj->getFullPath())
             );
         }
 

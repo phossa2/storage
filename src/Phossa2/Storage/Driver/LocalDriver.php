@@ -49,7 +49,8 @@ class LocalDriver extends DriverAbstract
     {
         if (!$this->makeDirectory($rootDir)) {
             throw new LogicException(
-                $this->getError(), $this->getErrorCode()
+                $this->getError(),
+                $this->getErrorCode()
             );
         }
         $this->root = rtrim($rootDir, "/\\") . \DIRECTORY_SEPARATOR;

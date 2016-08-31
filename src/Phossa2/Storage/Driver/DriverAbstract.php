@@ -63,10 +63,8 @@ abstract class DriverAbstract extends ObjectAbstract implements DriverInterface,
         $real = $this->realPath($path);
         if ($this->isRealDir($real)) {
             return $this->readDir($real, rtrim($path, '/\\') . '/');
-
         } elseif ($stream) {
             return $this->openReadStream($real);
-
         } else {
             return $this->readFile($real);
         }
@@ -81,11 +79,9 @@ abstract class DriverAbstract extends ObjectAbstract implements DriverInterface,
 
         if ($this->isRealDir($real)) {
             return [];
-
         } elseif ($this->use_metafile) {
             $meta = $this->readFile($real . '.meta');
             return is_string($meta) ? unserialize($meta) : [];
-
         } else {
             return $this->getRealMeta($real);
         }
