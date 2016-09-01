@@ -3,7 +3,7 @@
 
 Contributions are **welcome** and will be fully **credited**.
 
-We accept contributions via Pull Requests on [Github](https://github.com/:vendor/storage).
+We accept contributions via Pull Requests on [Github](https://github.com/phossa2/storage).
 
 ## Pull Requests
 
