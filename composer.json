@@ -3,7 +3,7 @@
     "license": "MIT",
     "type": "library",
     "description": "A storage front for local or remote storage system",
-    "keywords": ["storage", "phossa"],
+    "keywords": ["storage", "phossa", "phossa2", "filesystem"],
     "homepage": "https://github.com/phossa2/storage",
     "authors": [
         {
@@ -12,7 +12,7 @@
         }
     ],
     "require": {
-        "php": "~5.4|~7.0",
+        "php": "~5.4.0|~7.0.0",
         "phossa2/shared": "^2.0.23"
     },
     "require-dev": {
@@ -20,15 +20,12 @@
         "squizlabs/php_codesniffer": "2.*"
     },
     "autoload": {
-        "psr-0": { "Phossa2\\Storage\\": "src/" }
+        "psr-4": { "Phossa2\\Storage\\": "Storage/" }
     },
     "scripts": {
         "test": "phpunit",
-        "check": "phpcs --standard=psr2 src/",
-        "format": "phpcbf --standard=psr2 src/"
-    },
-    "provide": {
-        "psr/log-implementation": "1.0.0"
+        "check": "phpcs --standard=psr2 Storage/",
+        "format": "phpcbf --standard=psr2 Storage/"
     },
     "config": {
         "platform": {
@@ -37,7 +34,7 @@
     },
     "extra": {
         "branch-alias": {
-            "dev-master": "2.0-dev"
+            "dev-master": "2.1-dev"
         }
     },
     "archive": {
