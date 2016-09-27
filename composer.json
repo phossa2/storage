@@ -20,12 +20,12 @@
         "squizlabs/php_codesniffer": "2.*"
     },
     "autoload": {
-        "psr-4": { "Phossa2\\Storage\\": "Storage/" }
+        "psr-4": { "Phossa2\\Storage\\": "src/Storage/" }
     },
     "scripts": {
         "test": "phpunit",
-        "check": "phpcs --standard=psr2 Storage/",
-        "format": "phpcbf --standard=psr2 Storage/"
+        "check": "phpcs --standard=psr2 src/",
+        "format": "phpcbf --standard=psr2 src/"
     },
     "config": {
         "platform": {
