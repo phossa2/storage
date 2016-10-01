@@ -394,7 +394,7 @@ class StorageTest extends \PHPUnit_Framework_TestCase
     {
         // mount another filesystem
         $dir = $this->dir . 'x1';
-        $this->object->mount('/disk', new Filesystem(new LocalDriver($dir)));
+        $this->object->mount('/disk', new Filesystem($dir));
 
         // put
         $this->assertTrue($this->object->put('/bingo', 'wow'));

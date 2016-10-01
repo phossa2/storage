@@ -7,5 +7,6 @@ project adheres to [Semantic Versioning](http://semver.org/).
 
 - Changed
 
+  - 2016-09-30 change `Filesystem::__construct()` signature
   - 2016-09-27 restructured to follow psr-4 standard
   - 2016-09-27 moved to version 2.1-dev

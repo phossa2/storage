@@ -63,7 +63,7 @@ use Phossa2\Storage\Driver\LocalDriver;
 // mount local dir '/www/storage' to '/local'
 $storage = new Storage(
     '/local',
-    new Filesystem(new LocalDriver('/www/storage'))
+    new Filesystem('/www/storage')
 );
 
 // add a file
@@ -145,7 +145,7 @@ Features
   $storage->mount(
       '/readonly',
       new Filesystem(
-        new LocalDriver('/home/www/public'),
+        '/home/www/public',
         Filesystem::PERM_READ
       )
   );
@@ -154,7 +154,7 @@ Features
   $storage->put('/readonly/newfile.txt', 'this is the content');
   ```
 
-  Different filesystem may use same drivers,
+  Different filesystem may use same driver,
 
   ```php
   $driver = new LocalDriver('/home/www/public');
